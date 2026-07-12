@@ -102,8 +102,8 @@ A modern travel booking platform where users can search and book flights, hotels
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/booking-app-dev/Booking-Frontend.git
-cd Booking-Frontend
+git clone https://github.com/SAFARNI-BOOKING-AVENGERS-TEAM/SAFARNI-BOOKING-FRONTEND
+cd SAFARNI-BOOKING-AVENGERS-TEAM/SAFARNI-BOOKING-FRONTEND
 npm install
 ```
 
