@@ -1,68 +1,85 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  darkMode: "class",
   theme: {
     extend: {
       colors: {
         primary: {
-          50:  "#eff6ff",
+          50: "#eff6ff",
           100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
           400: "#60a5fa",
           500: "#3b82f6",
           600: "#2563eb",
           700: "#1d4ed8",
+          800: "#1e40af",
           900: "#1e3a8a",
+          950: "#172554",
         },
-        dark: {
-          800: "#1e2433",
-          900: "#141824",
-          950: "#0d1117",
+        success: {
+          50: "#f0fdf4",
+          100: "#dcfce7",
+          500: "#22c55e",
+          600: "#16a34a",
+          700: "#15803d",
         },
-        gold: {
-          400: "#fbbf24",
+        warning: {
+          50: "#fffbeb",
+          100: "#fef3c7",
           500: "#f59e0b",
-        }
+          600: "#d97706",
+          700: "#b45309",
+        },
+        danger: {
+          50: "#fef2f2",
+          100: "#fee2e2",
+          500: "#ef4444",
+          600: "#dc2626",
+          700: "#b91c1c",
+        },
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: [
+          "var(--font-sans)",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "sans-serif",
+        ],
       },
-      animation: {
-        "fade-up":   "fadeUp 0.6s ease forwards",
-        "fade-in":   "fadeIn 0.4s ease forwards",
-        "shimmer":   "shimmer 2s linear infinite",
-        "float":     "float 3s ease-in-out infinite",
+      borderRadius: {
+        "4": "4px",
+        "6": "6px",
+        "8": "8px",
+        "10": "10px",
+        "12": "12px",
+        "16": "16px",
       },
       keyframes: {
-        fadeUp: {
-          "0%":   { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        fadeIn: {
-          "0%":   { opacity: "0" },
+        "fade-in": {
+          "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
-        shimmer: {
-          "0%":   { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%":      { transform: "translateY(-6px)" },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
         },
       },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "hero-pattern":    "linear-gradient(135deg, #0d1117 0%, #141824 50%, #1e2433 100%)",
+      animation: {
+        "fade-in": "fade-in 0.2s ease-out",
+        "slide-up": "slide-up 0.3s ease-out",
       },
     },
   },
   plugins: [],
-}
+};
 
-export default config
+export default config;

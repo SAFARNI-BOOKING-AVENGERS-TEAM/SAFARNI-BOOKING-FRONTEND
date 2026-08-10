@@ -1,0 +1,71 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import Navbar from "@/components/layout/navbar";
+import Sidebar from "@/components/layout/sidebar";
+import RoleGuardLayout from "@/components/layout/role-guard-layout";
+
+
+const adminLinks = [
+  { href: "/admin-dashboard", label: "Dashboard", icon: "LayoutDashboard" },
+  { href: "/admin-users", label: "Users", icon: "Users" },
+  { href: "/admin-providers", label: "Providers", icon: "Briefcase" },
+  { href: "/admin-services", label: "Services", icon: "Layers" },
+  { href: "/admin-bookings", label: "Bookings", icon: "Calendar" },
+  { href: "/admin-audit", label: "Audit Logs", icon: "FileText" },
+];
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+})
+ 
+{
+  const router = useRouter();
+  const { isAuthenticated, isLoading, user } = useSelector(
+    (state: RootState) => state.auth
+  );
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.push("/login");
+      } else if (user?.role !== "admin") {
+        router.push("/dashboard");
+      }
+    }
+  }, [isLoading, isAuthenticated, user, router]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || user?.role !== "admin") {
+    return null;
+  }
+  
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex flex-1">
+        <Sidebar links={adminLinks} user={user} />
+        <main className="flex-1 p-6 lg:p-8 bg-gray-50">{children}</main>
+      </div>
+    </div>
+  );
+  {
+  return (
+    <RoleGuardLayout links={adminLinks} allowedRoles={["admin"]} redirectTo="/dashboard">
+      {children}
+    </RoleGuardLayout>
+  );
+}}
