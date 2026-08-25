@@ -15,6 +15,7 @@ import {
   Users,
   Layers,
   FileText,
+  Smartphone,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -31,6 +32,7 @@ const iconMap: Record<string, React.ElementType> = {
   Users,
   Layers,
   FileText,
+  Smartphone,
 };
 
 interface SidebarLink {
@@ -51,9 +53,7 @@ export default function Sidebar({ links, user }: SidebarProps) {
 
   return (
     <aside
-      className={`hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-200 ${
-        collapsed ? "w-16" : "w-64"
-      }`}
+      className={`hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-200 ${collapsed ? "w-16" : "w-64"}`}
     >
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {!collapsed && (
@@ -62,10 +62,7 @@ export default function Sidebar({ links, user }: SidebarProps) {
             <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
           </div>
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 rounded-lg hover:bg-gray-100 text-gray-500"
-        >
+        <button onClick={() => setCollapsed(!collapsed)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-500">
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
@@ -81,9 +78,7 @@ export default function Sidebar({ links, user }: SidebarProps) {
               key={link.href}
               href={link.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                isActive ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
               }`}
               title={collapsed ? link.label : undefined}
             >
@@ -92,9 +87,7 @@ export default function Sidebar({ links, user }: SidebarProps) {
                 <span className="flex-1 flex items-center justify-between">
                   {link.label}
                   {isNotifications && notificationBadge.count > 0 && (
-                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                      {notificationBadge.count}
-                    </span>
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{notificationBadge.count}</span>
                   )}
                 </span>
               )}
