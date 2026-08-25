@@ -1,0 +1,124 @@
+"use client";
+
+import { Suspense } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, AlertTriangle, Loader2, Smartphone, Calendar } from "lucide-react";
+import { Card, CardContent, Button } from "@/components/ui";
+import { paymentsApi } from "@/lib/api/payments";
+import { esimApi } from "@/lib/api/esim";
+import { useToast } from "@/lib/hooks/use-toast";
+import { getApiErrorMessage } from "@/lib/api/error";
+import { formatPrice } from "@/lib/utils";
+
+function SuccessContent() {
+  const searchParams = useSearchParams();
+  const sessionId = searchParams.get("session_id") || "";
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  const verificationQuery = useQuery({
+    queryKey: ["payments", "checkout", sessionId],
+    queryFn: () => paymentsApi.verifyCheckoutSession(sessionId),
+    enabled: !!sessionId,
+    retry: 2,
+  });
+
+  const verification = verificationQuery.data?.data;
+  const isPaid = verification?.paymentStatus === "paid";
+  const isEsim = !!verification?.esimOrderId;
+  const needsRetry = isEsim && verification?.fulfillmentStatus === "failed";
+
+  const retryMutation = useMutation({
+    mutationFn: () => esimApi.retryProvision(verification!.esimOrderId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments", "checkout", sessionId] });
+      queryClient.invalidateQueries({ queryKey: ["esim", "orders"] });
+      toast.success("eSIM provisioned successfully");
+    },
+    onError: (error) => toast.error("Couldn't provision eSIM", getApiErrorMessage(error)),
+  });
+
+  if (!sessionId) {
+    return <div className="text-sm text-red-600">Missing Stripe checkout session.</div>;
+  }
+
+  if (verificationQuery.isLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 text-sm text-gray-500 py-20">
+        <Loader2 className="w-5 h-5 animate-spin" /> Verifying payment with Stripe…
+      </div>
+    );
+  }
+
+  if (verificationQuery.isError || !verification) {
+    return (
+      <Card className="max-w-xl mx-auto">
+        <CardContent className="p-6">
+          <AlertTriangle className="w-10 h-10 text-amber-500" />
+          <h1 className="text-xl font-bold text-gray-900 mt-4">We couldn't verify this payment yet</h1>
+          <p className="text-sm text-gray-500 mt-2">Your card may still be processing. Check your bookings or eSIM orders before trying to pay again.</p>
+          <div className="flex gap-3 mt-5">
+            <Link href="/bookings"><Button variant="outline">My bookings</Button></Link>
+            <Link href="/esim-orders"><Button variant="outline">My eSIMs</Button></Link>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="max-w-xl mx-auto">
+      <CardContent className="p-6">
+        {isPaid ? (
+          <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+        ) : (
+          <AlertTriangle className="w-12 h-12 text-amber-500" />
+        )}
+
+        <h1 className="text-2xl font-bold text-gray-900 mt-4">
+          {isPaid ? "Payment received" : "Payment is still pending"}
+        </h1>
+        <p className="text-sm text-gray-500 mt-2">
+          {isPaid
+            ? isEsim
+              ? needsRetry
+                ? "Stripe confirmed your payment, but eSIM provisioning needs another attempt. You will not be charged again."
+                : "Stripe confirmed your payment and SAFARNI has processed your eSIM order."
+              : "Stripe confirmed your payment and your SAFARNI booking is now confirmed."
+            : "Stripe has not marked this checkout as paid yet."}
+        </p>
+
+        <div className="mt-5 p-4 bg-gray-50 rounded-lg space-y-1 text-sm">
+          <div className="flex justify-between"><span className="text-gray-500">Amount</span><span className="font-medium text-gray-900">{formatPrice(verification.amount, verification.currency)}</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">Payment</span><span className="font-medium text-gray-900 capitalize">{verification.paymentStatus}</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">Fulfillment</span><span className="font-medium text-gray-900 capitalize">{verification.fulfillmentStatus}</span></div>
+        </div>
+
+        {needsRetry && (
+          <Button className="w-full mt-5" onClick={() => retryMutation.mutate()} isLoading={retryMutation.isPending}>
+            Retry eSIM provisioning
+          </Button>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+          {isEsim ? (
+            <Link href="/esim-orders"><Button variant="outline" className="w-full" leftIcon={<Smartphone className="w-4 h-4" />}>My eSIMs</Button></Link>
+          ) : (
+            <Link href="/bookings"><Button variant="outline" className="w-full" leftIcon={<Calendar className="w-4 h-4" />}>My bookings</Button></Link>
+          )}
+          <Link href="/dashboard"><Button className="w-full">Go to dashboard</Button></Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<div className="text-sm text-gray-500">Verifying payment…</div>}>
+      <SuccessContent />
+    </Suspense>
+  );
+}
