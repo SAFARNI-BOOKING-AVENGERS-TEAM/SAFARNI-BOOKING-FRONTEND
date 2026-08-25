@@ -38,11 +38,24 @@ export interface ProviderDashboardStats {
     cars: StatusCount;
     flights: StatusCount;
     tours: StatusCount;
+    esimPlans: StatusCount;
   };
   bookings: {
     total: number;
     totalRevenue: number;
     byStatus: { pending: number; confirmed: number; cancelled: number };
+  };
+  esim: {
+    totalOrders: number;
+    completedOrders: number;
+    pendingOrders: number;
+    failedOrders: number;
+    revenue: number;
+  };
+  revenue: {
+    travel: number;
+    esim: number;
+    total: number;
   };
 }
 
