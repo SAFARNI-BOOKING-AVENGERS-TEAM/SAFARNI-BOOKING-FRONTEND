@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -18,7 +18,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
@@ -113,5 +113,27 @@ export default function LoginPage() {
         </Link>
       </p>
     </div>
+  );
+}
+
+function LoginFallback() {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
+      <div className="h-6 w-32 rounded bg-gray-100 animate-pulse mb-2" />
+      <div className="h-4 w-48 rounded bg-gray-100 animate-pulse mb-6" />
+      <div className="space-y-4">
+        <div className="h-10 rounded-lg bg-gray-100 animate-pulse" />
+        <div className="h-10 rounded-lg bg-gray-100 animate-pulse" />
+        <div className="h-10 rounded-lg bg-gray-100 animate-pulse" />
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginFormContent />
+    </Suspense>
   );
 }
