@@ -10,6 +10,26 @@ export const apiClient = axios.create({
   withCredentials: true, // sends httpOnly cookies automatically
 });
 
+const PUBLIC_PATHS = [
+  "/",
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/tours",
+  "/hotels",
+  "/cars",
+  "/flights",
+  "/packages",
+  "/esim",
+  "/search",
+];
+
+function isPublicBrowserPath(pathname: string): boolean {
+  return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+}
+
 // Request interceptor — can add headers if needed
 apiClient.interceptors.request.use(
   (config) => config,
@@ -22,23 +42,28 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        // Attempt token refresh — backend rotates refreshTokenVersion
+        // Attempt token refresh — backend rotates refreshTokenVersion.
         await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
           {},
           { withCredentials: true }
         );
-        // Retry original request with new access_token cookie
+
+        // Retry original request with the newly rotated access_token cookie.
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Refresh failed — redirect to login
-        if (typeof window !== "undefined") {
-          window.location.href = "/login";
+        // A logged-out visitor may legitimately trigger a 401 while a public
+        // page probes for the current session. Never reload/redirect a public
+        // page in that case; doing so on /login creates an infinite reload loop.
+        if (typeof window !== "undefined" && !isPublicBrowserPath(window.location.pathname)) {
+          const returnTo = `${window.location.pathname}${window.location.search}`;
+          window.location.replace(`/login?redirect=${encodeURIComponent(returnTo)}`);
         }
+
         return Promise.reject(refreshError);
       }
     }
