@@ -1,7 +1,6 @@
 import type { Hotel, Room, Package, Tour, Car, Flight } from "./service";
-import type { Pagination, PaginatedResponse } from "./api";
+import type { Pagination } from "./api";
 import type { BookingCategory, Booking } from "./booking";
-import type { Notification, NotificationStats } from "./notification";
 
 // The hotel module's GET routes bypass the shared successResponse() helper
 // and hand-roll their own response shape — no `message`/`statusCode`,
@@ -77,11 +76,4 @@ export interface PackageDetailsData {
 export interface PackageBookingResult {
   packageBookingId: string;
   bookings: Booking[];
-}
-
-// GET /notifications adds an `info.unreadCount` alongside the standard
-// paginated shape — not part of PaginatedResponse itself since no other
-// module does this.
-export interface NotificationListResponse extends PaginatedResponse<Notification> {
-  info: NotificationStats;
 }
