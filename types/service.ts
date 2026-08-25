@@ -67,6 +67,7 @@ export interface ESIMPlan extends BaseService {
 }
 
 export type ESIMOrderStatus = "pending" | "processing" | "completed" | "failed" | "cancelled";
+export type ESIMPaymentStatus = "unpaid" | "pending" | "succeeded" | "failed";
 export type ESIMProfileStatus = "ready" | "activated" | "expired" | "suspended";
 export interface ESIMProfile {
   iccid: string;
@@ -81,6 +82,7 @@ export interface ESIMOrder {
   userId: string;
   planId: ESIMPlan | string;
   status: ESIMOrderStatus;
+  paymentStatus: ESIMPaymentStatus;
   price: number;
   currency: string;
   packageBookingId?: string;
