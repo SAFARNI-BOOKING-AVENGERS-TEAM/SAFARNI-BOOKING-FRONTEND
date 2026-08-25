@@ -8,6 +8,7 @@ export interface ESIMListParams {
   region?: string;
   page?: number;
   limit?: number;
+  mine?: boolean;
 }
 
 export const esimApi = {
