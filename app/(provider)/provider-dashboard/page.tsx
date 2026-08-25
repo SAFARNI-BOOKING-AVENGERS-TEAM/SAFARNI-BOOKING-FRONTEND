@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Briefcase, Calendar, DollarSign, Clock3, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
+import { Briefcase, Calendar, DollarSign, Clock3, ArrowRight, CheckCircle2, XCircle, Smartphone } from "lucide-react";
 import { Card, CardContent, Skeleton } from "@/components/ui";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -13,6 +13,7 @@ const serviceLabels: Record<string, string> = {
   cars: "Cars",
   flights: "Flights",
   tours: "Tours",
+  esimPlans: "eSIM plans",
 };
 
 export default function ProviderDashboardPage() {
@@ -27,13 +28,15 @@ export default function ProviderDashboardPage() {
   const services = stats?.services ? Object.entries(stats.services) : [];
   const totalServices = services.reduce((sum, [, value]) => sum + value.total, 0);
   const pendingServices = services.reduce((sum, [, value]) => sum + value.pending, 0);
+  const totalOperations = (stats?.bookings.total ?? 0) + (stats?.esim.totalOrders ?? 0);
+  const hasESIMScope = user?.providerType === "telecom" || user?.providerType === "both" || (stats?.services.esimPlans.total ?? 0) > 0;
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-1">
         Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
       </h1>
-      <p className="text-sm text-gray-500 mb-6">Here&apos;s how your services are performing</p>
+      <p className="text-sm text-gray-500 mb-6">Here&apos;s how your SAFARNI services are performing</p>
 
       {isError ? (
         <Card className="mb-6"><CardContent className="p-5 text-sm text-red-600">Couldn&apos;t load dashboard statistics. Please try again.</CardContent></Card>
@@ -41,8 +44,8 @@ export default function ProviderDashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <MetricCard href="/my-services" icon={<Briefcase className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : totalServices} label="My services" />
-        <MetricCard href="/provider-bookings" icon={<Calendar className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : stats?.bookings.total ?? 0} label="Bookings" />
-        <MetricCard href="/earnings" icon={<DollarSign className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : formatPrice(stats?.bookings.totalRevenue ?? 0)} label="Revenue" />
+        <MetricCard href="/provider-bookings" icon={<Calendar className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : totalOperations} label="Bookings & orders" />
+        <MetricCard href="/earnings" icon={<DollarSign className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : formatPrice(stats?.revenue.total ?? 0)} label="Paid revenue" />
         <MetricCard href="/my-services" icon={<Clock3 className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : pendingServices} label="Pending approval" />
       </div>
 
@@ -68,11 +71,16 @@ export default function ProviderDashboardPage() {
         </section>
 
         <section>
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Booking status</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-semibold text-gray-900">Operations</h2>
+            <Link href="/provider-bookings" className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">View all <ArrowRight className="w-3.5 h-3.5" /></Link>
+          </div>
           <div className="space-y-2">
-            <StatusCard icon={<CheckCircle2 className="w-5 h-5 text-gray-600" />} label="Confirmed bookings" description="Active confirmed reservations" value={isLoading ? "—" : stats?.bookings.byStatus.confirmed ?? 0} />
-            <StatusCard icon={<Clock3 className="w-5 h-5 text-gray-600" />} label="Pending bookings" description="Reservations waiting for action" value={isLoading ? "—" : stats?.bookings.byStatus.pending ?? 0} />
-            <StatusCard icon={<XCircle className="w-5 h-5 text-gray-600" />} label="Cancelled bookings" description="Cancelled reservations" value={isLoading ? "—" : stats?.bookings.byStatus.cancelled ?? 0} />
+            <StatusCard icon={<CheckCircle2 className="w-5 h-5 text-gray-600" />} label="Confirmed travel bookings" description="Stripe-paid confirmed reservations" value={isLoading ? "—" : stats?.bookings.byStatus.confirmed ?? 0} />
+            <StatusCard icon={<Clock3 className="w-5 h-5 text-gray-600" />} label="Pending travel bookings" description="Reservations awaiting payment" value={isLoading ? "—" : stats?.bookings.byStatus.pending ?? 0} />
+            {hasESIMScope && <StatusCard icon={<Smartphone className="w-5 h-5 text-gray-600" />} label="Completed eSIM orders" description="Paid and successfully provisioned" value={isLoading ? "—" : stats?.esim.completedOrders ?? 0} />}
+            {hasESIMScope && <StatusCard icon={<Clock3 className="w-5 h-5 text-gray-600" />} label="Pending eSIM orders" description="Awaiting payment or provisioning" value={isLoading ? "—" : stats?.esim.pendingOrders ?? 0} />}
+            {!hasESIMScope && <StatusCard icon={<XCircle className="w-5 h-5 text-gray-600" />} label="Cancelled bookings" description="Cancelled travel reservations" value={isLoading ? "—" : stats?.bookings.byStatus.cancelled ?? 0} />}
           </div>
         </section>
       </div>
