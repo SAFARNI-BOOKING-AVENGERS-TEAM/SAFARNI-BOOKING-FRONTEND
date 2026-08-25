@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Briefcase, Calendar, DollarSign, ArrowRight, ShieldCheck, Clock3 } from "lucide-react";
+import { Users, Briefcase, Calendar, DollarSign, ArrowRight, ShieldCheck, Clock3, CreditCard } from "lucide-react";
 import { Card, CardContent, Skeleton } from "@/components/ui";
 import { dashboardApi } from "@/lib/api/dashboard";
+import { adminApi } from "@/lib/api/admin";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { formatPrice } from "@/lib/utils";
 
@@ -24,11 +25,32 @@ export default function AdminDashboardPage() {
     queryFn: dashboardApi.getAdminStats,
     staleTime: 60_000,
   });
+  const stripeQuery = useQuery({
+    queryKey: ["admin", "stripe", "status"],
+    queryFn: adminApi.getStripeStatus,
+    staleTime: 30_000,
+    retry: false,
+  });
 
   const stats = response?.data;
+  const stripe = stripeQuery.data?.data;
   const services = stats?.services ? Object.entries(stats.services) : [];
   const pendingServices = services.reduce((sum, [, value]) => sum + value.pending, 0);
   const totalBookings = stats?.bookings.byCategory.reduce((sum, item) => sum + item.totalBookings, 0) ?? 0;
+
+  const stripeLabel = stripeQuery.isLoading
+    ? "Checking..."
+    : stripe?.reachable
+      ? `${stripe.mode === "test" ? "Test mode" : stripe.mode === "live" ? "Live mode" : "Connected"}${stripe.webhookConfigured ? " · webhook ready" : " · webhook missing"}`
+      : stripe?.configured
+        ? "Configured but unreachable"
+        : "Not configured";
+
+  const stripeTone = stripe?.reachable && stripe.webhookConfigured
+    ? "bg-emerald-50 text-emerald-700"
+    : stripe?.reachable
+      ? "bg-amber-50 text-amber-700"
+      : "bg-red-50 text-red-700";
 
   return (
     <div>
@@ -84,6 +106,16 @@ export default function AdminDashboardPage() {
                 <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><ShieldCheck className="w-5 h-5 text-gray-600" /></div>
                 <div className="flex-1"><p className="text-sm font-medium text-gray-900">Admin accounts</p><p className="text-xs text-gray-500">Users with full platform access</p></div>
                 <span className="text-xl font-bold text-gray-900">{isLoading ? "—" : stats?.users.byRole.admin ?? 0}</span>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><CreditCard className="w-5 h-5 text-gray-600" /></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">Stripe payment integration</p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">{stripe?.message ?? "Checking payment configuration"}</p>
+                </div>
+                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${stripeTone}`}>{stripeLabel}</span>
               </CardContent>
             </Card>
             <Card>
