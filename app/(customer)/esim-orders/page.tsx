@@ -14,7 +14,9 @@ const statusClass: Record<string, string> = {
   pending: "bg-amber-50 text-amber-700",
   processing: "bg-blue-50 text-blue-700",
   completed: "bg-emerald-50 text-emerald-700",
+  succeeded: "bg-emerald-50 text-emerald-700",
   failed: "bg-red-50 text-red-700",
+  unpaid: "bg-gray-100 text-gray-600",
   cancelled: "bg-gray-100 text-gray-600",
 };
 
@@ -25,10 +27,7 @@ function getPlan(order: ESIMOrder): ESIMPlan | null {
 export default function ESIMOrdersPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const ordersQuery = useQuery({
-    queryKey: ["esim", "orders"],
-    queryFn: esimApi.getMyOrders,
-  });
+  const ordersQuery = useQuery({ queryKey: ["esim", "orders"], queryFn: esimApi.getMyOrders });
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["esim", "orders"] });
 
@@ -61,8 +60,10 @@ export default function ESIMOrdersPage() {
         <div className="space-y-4">
           {orders.map((order) => {
             const plan = getPlan(order);
-            const profileReady = order.status === "completed" && order.profile?.status === "ready";
-            const activated = order.profile?.status === "activated";
+            const isPaid = order.paymentStatus === "succeeded";
+            const canPay = !isPaid && order.status !== "cancelled" && order.status !== "completed";
+            const canRetryProvision = isPaid && order.status === "failed";
+            const profileReady = isPaid && order.status === "completed" && order.profile?.status === "ready";
 
             return (
               <Card key={order._id}>
@@ -76,10 +77,13 @@ export default function ESIMOrdersPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <h2 className="font-semibold text-gray-900">{plan?.name ?? "eSIM order"}</h2>
                           <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${statusClass[order.status] ?? statusClass.cancelled}`}>
-                            {order.status}
+                            order: {order.status}
+                          </span>
+                          <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${statusClass[order.paymentStatus] ?? statusClass.unpaid}`}>
+                            payment: {order.paymentStatus}
                           </span>
                           {order.profile?.status && (
-                            <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">{order.profile.status}</span>
+                            <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">SIM: {order.profile.status}</span>
                           )}
                         </div>
                         <p className="text-sm text-gray-500 mt-1">
@@ -90,12 +94,12 @@ export default function ESIMOrdersPage() {
                     </div>
 
                     <div className="flex gap-2 flex-wrap">
-                      {order.status === "pending" && (
+                      {canPay && (
                         <Link href={`/checkout?esimOrderId=${encodeURIComponent(order._id)}`}>
                           <Button leftIcon={<CreditCard className="w-4 h-4" />}>Pay now</Button>
                         </Link>
                       )}
-                      {order.status === "failed" && (
+                      {canRetryProvision && (
                         <Button
                           variant="outline"
                           leftIcon={<RefreshCw className="w-4 h-4" />}
@@ -105,7 +109,7 @@ export default function ESIMOrdersPage() {
                           Retry provisioning
                         </Button>
                       )}
-                      {profileReady && !activated && (
+                      {profileReady && (
                         <Button
                           leftIcon={<Zap className="w-4 h-4" />}
                           onClick={() => activateMutation.mutate(order._id)}
@@ -116,6 +120,10 @@ export default function ESIMOrdersPage() {
                       )}
                     </div>
                   </div>
+
+                  {isPaid && order.status === "processing" && (
+                    <p className="mt-4 text-sm text-blue-700 bg-blue-50 rounded-lg px-3 py-2">Payment is complete. SAFARNI is provisioning this eSIM now.</p>
+                  )}
 
                   {order.profile && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-5 pt-5 border-t border-gray-100 text-sm">
