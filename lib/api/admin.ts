@@ -68,6 +68,22 @@ export const adminApi = {
     const res = await apiClient.patch<ApiResponse<AdminUser>>(`/admin/users/${id}/role`, { role, providerType });
     return res.data;
   },
+  getProviders: async () => {
+    const res = await apiClient.get<ApiResponse<AdminUser[]>>("/auth/service-providers");
+    return res.data;
+  },
+  createProvider: async (data: { name: string; email: string; password: string; providerType: ProviderType }) => {
+    const res = await apiClient.post<ApiResponse<AdminUser>>("/auth/service-providers", data);
+    return res.data;
+  },
+  updateProvider: async (id: string, data: { name?: string; email?: string; providerType?: ProviderType }) => {
+    const res = await apiClient.patch<ApiResponse<AdminUser>>(`/auth/service-providers/${id}`, data);
+    return res.data;
+  },
+  deleteProvider: async (id: string) => {
+    const res = await apiClient.delete<ApiResponse<null>>(`/auth/service-providers/${id}`);
+    return res.data;
+  },
   getServices: async (filters: { type?: string; status?: string } = {}) => {
     const res = await apiClient.get<ApiResponse<AdminService[]>>("/admin/services", params(filters));
     return res.data;
