@@ -1,20 +1,34 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/store";
-import { setUser, clearUser, setLoading } from "@/store/slices/authSlice";
+import { setUser, clearUser } from "@/store/slices/authSlice";
 import { authApi } from "@/lib/api/auth";
 import { usersApi } from "@/lib/api/users";
 import type { LoginCredentials, RegisterCredentials } from "@/types";
 
+const AUTH_ENTRY_PATHS = ["/login", "/register", "/forgot-password"];
+
+function shouldSkipProfileBootstrap(pathname: string): boolean {
+  return (
+    AUTH_ENTRY_PATHS.includes(pathname) ||
+    pathname.startsWith("/reset-password/") ||
+    pathname.startsWith("/verify-email/")
+  );
+}
+
 export function useAuth() {
   const dispatch = useDispatch<AppDispatch>();
   const queryClient = useQueryClient();
+  const pathname = usePathname();
   const { user, isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
 
-  // Fetch current user on mount — syncs Redux with server state
+  // Fetch current user on pages where session-aware UI is useful. Auth entry
+  // pages intentionally skip this probe so logged-out visitors don't create a
+  // pointless 401 -> refresh attempt before they have even submitted the form.
   const { isLoading: isProfileLoading } = useQuery({
     queryKey: ["user", "profile"],
     queryFn: async () => {
@@ -27,6 +41,7 @@ export function useAuth() {
         return null;
       }
     },
+    enabled: !shouldSkipProfileBootstrap(pathname),
     retry: false,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
@@ -34,9 +49,9 @@ export function useAuth() {
 
   // Login mutation
   const login = useMutation({
-    mutationFn: authApi.login,
+    mutationFn: (credentials: LoginCredentials) => authApi.login(credentials),
     onSuccess: (res) => {
-      // Backend returns user in login response — no need for extra fetch
+      // Backend returns user in login response — no need for an extra fetch.
       if (res.data?.user) {
         dispatch(setUser(res.data.user as any));
       }
@@ -46,7 +61,7 @@ export function useAuth() {
 
   // Register mutation
   const register = useMutation({
-    mutationFn: authApi.register,
+    mutationFn: (credentials: RegisterCredentials) => authApi.register(credentials),
   });
 
   // Logout mutation
@@ -59,7 +74,7 @@ export function useAuth() {
     },
   });
 
-  // Combined loading state
+  // Combined loading state. Disabled profile queries are not loading.
   const loading = isLoading || isProfileLoading;
 
   return {
