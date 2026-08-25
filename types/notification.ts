@@ -1,3 +1,5 @@
+import type { Pagination } from "./api";
+
 export type NotificationType =
   | "booking_created"
   | "booking_status_changed"
@@ -17,4 +19,12 @@ export interface Notification {
 
 export interface NotificationStats {
   unreadCount: number;
+}
+
+export interface NotificationListResponse {
+  message: string;
+  statusCode: number;
+  data: Notification[];
+  pagination: Pagination;
+  info: NotificationStats;
 }
