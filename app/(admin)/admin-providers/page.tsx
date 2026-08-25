@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, UserMinus } from "lucide-react";
 import { Card, CardContent, Skeleton } from "@/components/ui";
 import { adminApi } from "@/lib/api/admin";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -41,10 +41,10 @@ export default function AdminProvidersPage() {
     onError: (error) => toast.error("Couldn't update provider", getApiErrorMessage(error)),
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: adminApi.deleteProvider,
-    onSuccess: () => { refresh(); toast.success("Provider removed"); },
-    onError: (error) => toast.error("Couldn't remove provider", getApiErrorMessage(error)),
+  const revokeMutation = useMutation({
+    mutationFn: (id: string) => adminApi.updateUserRole(id, "user"),
+    onSuccess: () => { refresh(); toast.success("Provider access revoked"); },
+    onError: (error) => toast.error("Couldn't revoke provider access", getApiErrorMessage(error)),
   });
 
   const submit = (event: FormEvent) => {
@@ -77,7 +77,7 @@ export default function AdminProvidersPage() {
               <td className="px-5 py-4"><p className="font-medium text-gray-900">{provider.name}</p><p className="text-xs text-gray-500">{provider.email}</p></td>
               <td className="px-5 py-4"><select value={provider.providerType ?? "travel"} disabled={updateMutation.isPending} onChange={(e) => updateMutation.mutate({ id: provider._id, providerType: e.target.value as ProviderType })} className="h-9 px-2 rounded-lg border border-gray-200 bg-white"><option value="travel">Travel</option><option value="telecom">Telecom</option><option value="both">Both</option></select></td>
               <td className="px-5 py-4"><span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">Active</span></td>
-              <td className="px-5 py-4 text-right"><button onClick={() => { if (window.confirm(`Remove provider ${provider.name}?`)) deleteMutation.mutate(provider._id); }} className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700"><Trash2 className="w-3.5 h-3.5" /> Remove</button></td>
+              <td className="px-5 py-4 text-right"><button onClick={() => { if (window.confirm(`Revoke provider access for ${provider.name}? Their account and history will be preserved.`)) revokeMutation.mutate(provider._id); }} className="inline-flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700"><UserMinus className="w-3.5 h-3.5" /> Revoke access</button></td>
             </tr>)}
             {!providers.length && <tr><td colSpan={4} className="px-5 py-12 text-center text-gray-500">No provider accounts yet.</td></tr>}
           </tbody>
