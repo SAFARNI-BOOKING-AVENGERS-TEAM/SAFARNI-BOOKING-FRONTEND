@@ -55,6 +55,14 @@ export interface AuditLog {
   createdAt: string;
 }
 
+export interface StripeDiagnostics {
+  configured: boolean;
+  reachable: boolean;
+  mode: "test" | "live" | "unknown" | "not_configured";
+  webhookConfigured: boolean;
+  message: string;
+}
+
 const params = (values: Record<string, string | number | undefined>) => ({
   params: Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined && value !== "")),
 });
@@ -102,6 +110,10 @@ export const adminApi = {
   },
   getAuditLogs: async (filters: { search?: string; method?: string; success?: string; page?: number } = {}) => {
     const res = await apiClient.get<ApiResponse<Paginated<AuditLog>>>("/admin/audit-logs", params(filters));
+    return res.data;
+  },
+  getStripeStatus: async () => {
+    const res = await apiClient.get<ApiResponse<StripeDiagnostics>>("/payments/status");
     return res.data;
   },
 };
