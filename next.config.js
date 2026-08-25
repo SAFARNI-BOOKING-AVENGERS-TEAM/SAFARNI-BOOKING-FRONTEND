@@ -11,6 +11,10 @@ const nextConfig = {
   },
 
   images: {
+    // Next.js 16 blocks optimization requests to local/private IPs by default.
+    // Allow it only during local development so avatars served by the Express
+    // backend (http://localhost:5000/uploads/...) can be rendered by next/image.
+    dangerouslyAllowLocalIP: process.env.NODE_ENV === "development",
     remotePatterns: [
       {
         protocol: "https",
@@ -25,7 +29,8 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        pathname: "/**",
+        port: "5000",
+        pathname: "/uploads/**",
       },
     ],
   },
