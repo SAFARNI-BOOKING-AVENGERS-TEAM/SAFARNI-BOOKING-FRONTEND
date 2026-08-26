@@ -18,6 +18,7 @@ interface ListingCardProps {
   priceSuffix?: string;
   originalPrice?: string;
   footer?: React.ReactNode;
+  priority?: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ export default function ListingCard({
   priceSuffix,
   originalPrice,
   footer,
+  priority = false,
 }: ListingCardProps) {
   return (
     <Link href={href} className="group block h-full">
@@ -52,6 +54,8 @@ export default function ListingCard({
               src={image}
               alt={title}
               fill
+              sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) 50vw, 33vw"
+              priority={priority}
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
