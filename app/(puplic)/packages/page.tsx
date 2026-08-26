@@ -13,9 +13,7 @@ export default function PackagesPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Packages</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        Bundled deals across hotels, tours, cars, and flights
-      </p>
+      <p className="text-sm text-gray-500 mb-6">Bundled deals across hotels, tours, cars, and flights</p>
 
       <ListingGrid
         items={data?.data}
@@ -25,7 +23,7 @@ export default function PackagesPage() {
         emptyIcon={PackageIcon}
         emptyTitle="No packages available"
         emptyDescription="Check back soon for new deals."
-        renderItem={(pkg) => {
+        renderItem={(pkg, index) => {
           const savings = Math.round(pkg.estimatedOriginalPrice * (pkg.discountPercentage / 100));
           const finalPrice = pkg.estimatedOriginalPrice - savings;
           return (
@@ -38,9 +36,8 @@ export default function PackagesPage() {
               price={formatPrice(finalPrice)}
               originalPrice={formatPrice(pkg.estimatedOriginalPrice)}
               priceLabel="Estimated total"
-              footer={
-                pkg.sourceType === "curated" ? <Badge variant="info">Safarni pick</Badge> : undefined
-              }
+              priority={index === 0}
+              footer={pkg.sourceType === "curated" ? <Badge variant="info">Safarni pick</Badge> : undefined}
             />
           );
         }}
