@@ -38,7 +38,8 @@ export const paymentsApi = {
 
   verifyCheckoutSession: async (sessionId: string) => {
     const res = await apiClient.get<ApiResponse<CheckoutVerification>>(
-      `/payments/checkout-session/${encodeURIComponent(sessionId)}`
+      `/payments/checkout-session/${encodeURIComponent(sessionId)}`,
+      { timeout: 20000 }
     );
     return res.data;
   },
