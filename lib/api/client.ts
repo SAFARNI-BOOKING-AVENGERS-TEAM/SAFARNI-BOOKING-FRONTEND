@@ -24,6 +24,7 @@ const PUBLIC_PATHS = [
   "/packages",
   "/esim",
   "/search",
+  "/ai-search",
 ];
 
 const AUTH_ENDPOINTS_WITHOUT_REFRESH = [
@@ -46,15 +47,11 @@ function isAuthEndpointWithoutRefresh(url?: string): boolean {
   );
 }
 
-// Request interceptor — can add headers if needed
 apiClient.interceptors.request.use(
   (config) => config,
   (error) => Promise.reject(error)
 );
 
-// Response interceptor — refresh an expired authenticated session, but never
-// intercept authentication endpoints themselves. A failed login is a real
-// login error, not a signal to refresh an older session cookie.
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -70,18 +67,14 @@ apiClient.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Attempt token refresh — backend rotates refreshTokenVersion.
         await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
           {},
           { withCredentials: true }
         );
 
-        // Retry original request with the newly rotated access_token cookie.
         return apiClient(originalRequest);
       } catch (refreshError) {
-        // Public pages must never be reload-looped because an optional session
-        // probe found stale or missing cookies.
         if (typeof window !== "undefined" && !isPublicBrowserPath(window.location.pathname)) {
           const returnTo = `${window.location.pathname}${window.location.search}`;
           window.location.replace(`/login?redirect=${encodeURIComponent(returnTo)}`);
