@@ -2,10 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
+import { useAuth } from "@/lib/hooks/use-auth";
 
 const customerLinks = [
   { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
@@ -18,10 +17,15 @@ const customerLinks = [
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user } = useSelector((state: RootState) => state.auth);
+  // Important: useAuth performs the /users/my-profile bootstrap. This is
+  // required after external full-page redirects (for example Stripe Checkout),
+  // because the in-memory Redux store starts fresh when the browser returns.
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.push("/login");
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/login");
+    }
   }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
