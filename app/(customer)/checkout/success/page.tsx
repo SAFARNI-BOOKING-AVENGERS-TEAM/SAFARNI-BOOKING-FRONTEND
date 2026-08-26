@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,16 +12,37 @@ import { useToast } from "@/lib/hooks/use-toast";
 import { getApiErrorMessage } from "@/lib/api/error";
 import { formatPrice } from "@/lib/utils";
 
+const LAST_CHECKOUT_SESSION_KEY = "safarni:last-checkout-session";
+
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get("session_id") || "";
+  const querySessionId = searchParams.get("session_id") || "";
+  const [fallbackSessionId, setFallbackSessionId] = useState("");
+  const [recoveryChecked, setRecoveryChecked] = useState(Boolean(querySessionId));
+  const sessionId = querySessionId || fallbackSessionId;
   const queryClient = useQueryClient();
   const toast = useToast();
+
+  useEffect(() => {
+    if (querySessionId) {
+      setRecoveryChecked(true);
+      return;
+    }
+
+    try {
+      const saved = sessionStorage.getItem(LAST_CHECKOUT_SESSION_KEY) || "";
+      if (saved.startsWith("cs_")) setFallbackSessionId(saved);
+    } catch {
+      // Session storage can be unavailable in some browser contexts.
+    } finally {
+      setRecoveryChecked(true);
+    }
+  }, [querySessionId]);
 
   const verificationQuery = useQuery({
     queryKey: ["payments", "checkout", sessionId],
     queryFn: () => paymentsApi.verifyCheckoutSession(sessionId),
-    enabled: !!sessionId,
+    enabled: recoveryChecked && !!sessionId,
     retry: 1,
   });
 
@@ -29,6 +50,15 @@ function SuccessContent() {
   const isPaid = verification?.paymentStatus === "paid";
   const isEsim = !!verification?.esimOrderId;
   const needsRetry = isEsim && verification?.fulfillmentStatus === "failed";
+
+  useEffect(() => {
+    if (!verification) return;
+    try {
+      sessionStorage.removeItem(LAST_CHECKOUT_SESSION_KEY);
+    } catch {
+      // No action needed if storage is unavailable.
+    }
+  }, [verification]);
 
   const retryMutation = useMutation({
     mutationFn: () => esimApi.retryProvision(verification!.esimOrderId!),
@@ -40,8 +70,30 @@ function SuccessContent() {
     onError: (error) => toast.error("Couldn't provision eSIM", getApiErrorMessage(error)),
   });
 
+  if (!recoveryChecked) {
+    return (
+      <div className="flex items-center justify-center gap-2 text-sm text-gray-500 py-20">
+        <Loader2 className="w-5 h-5 animate-spin" /> Recovering Stripe checkout session…
+      </div>
+    );
+  }
+
   if (!sessionId) {
-    return <div className="text-sm text-red-600">Missing Stripe checkout session.</div>;
+    return (
+      <Card className="max-w-xl mx-auto">
+        <CardContent className="p-6">
+          <AlertTriangle className="w-10 h-10 text-amber-500" />
+          <h1 className="text-xl font-bold text-gray-900 mt-4">Stripe checkout session is missing</h1>
+          <p className="text-sm text-gray-500 mt-2">
+            SAFARNI could not recover the Stripe session from the return URL or this browser session. Check your bookings or eSIM orders before starting another payment.
+          </p>
+          <div className="flex gap-3 mt-5 flex-wrap">
+            <Link href="/bookings"><Button variant="outline">My bookings</Button></Link>
+            <Link href="/esim-orders"><Button variant="outline">My eSIMs</Button></Link>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (verificationQuery.isLoading) {
