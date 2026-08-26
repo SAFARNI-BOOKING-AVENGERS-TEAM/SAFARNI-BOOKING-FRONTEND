@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Briefcase, Calendar, DollarSign, ArrowRight, ShieldCheck, Clock3, CreditCard } from "lucide-react";
+import { Users, Briefcase, Calendar, DollarSign, ArrowRight, ShieldCheck, Clock3, CreditCard, Bot } from "lucide-react";
 import { Card, CardContent, Skeleton } from "@/components/ui";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { adminApi } from "@/lib/api/admin";
@@ -31,9 +31,16 @@ export default function AdminDashboardPage() {
     staleTime: 30_000,
     retry: false,
   });
+  const aiSearchQuery = useQuery({
+    queryKey: ["admin", "ai-search", "status"],
+    queryFn: adminApi.getAISearchStatus,
+    staleTime: 30_000,
+    retry: false,
+  });
 
   const stats = response?.data;
   const stripe = stripeQuery.data?.data;
+  const aiSearch = aiSearchQuery.data?.data;
   const services = stats?.services ? Object.entries(stats.services) : [];
   const pendingServices = services.reduce((sum, [, value]) => sum + value.pending, 0);
   const totalBookings = stats?.bookings.byCategory.reduce((sum, item) => sum + item.totalBookings, 0) ?? 0;
@@ -51,6 +58,18 @@ export default function AdminDashboardPage() {
     : stripe?.reachable
       ? "bg-amber-50 text-amber-700"
       : "bg-red-50 text-red-700";
+
+  const aiReady = Boolean(aiSearch?.aiConfigured && aiSearch?.n8nConfigured);
+  const aiLabel = aiSearchQuery.isLoading
+    ? "Checking..."
+    : aiReady
+      ? "AI + n8n ready"
+      : aiSearch?.aiConfigured
+        ? "n8n missing"
+        : aiSearch?.n8nConfigured
+          ? "AI key missing"
+          : "Not configured";
+  const aiTone = aiReady ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700";
 
   return (
     <div>
@@ -116,6 +135,18 @@ export default function AdminDashboardPage() {
                   <p className="text-xs text-gray-500 mt-0.5 truncate">{stripe?.message ?? "Checking payment configuration"}</p>
                 </div>
                 <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${stripeTone}`}>{stripeLabel}</span>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><Bot className="w-5 h-5 text-gray-600" /></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">Ask SAFARNI live flight search</p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">
+                    {aiSearch ? `${aiSearch.aiModel} · ${aiSearch.cacheTtlSeconds}s search cache` : "Checking AI and n8n configuration"}
+                  </p>
+                </div>
+                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${aiTone}`}>{aiLabel}</span>
               </CardContent>
             </Card>
             <Card>
