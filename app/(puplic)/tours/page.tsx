@@ -20,21 +20,9 @@ export default function ToursPage() {
   const [page, setPage] = useState(1);
   const debouncedTitle = useDebounce(title);
 
-  const { data, isLoading, isError } = useTours({
-    title: debouncedTitle || undefined,
-    city: city || undefined,
-    difficulty: difficulty || undefined,
-    page,
-    limit: 9,
-  });
-
+  const { data, isLoading, isError } = useTours({ title: debouncedTitle || undefined, city: city || undefined, difficulty: difficulty || undefined, page, limit: 9 });
   const hasActiveFilters = !!title || !!city || !!difficulty;
-  const clearFilters = () => {
-    setTitle("");
-    setCity("");
-    setDifficulty("");
-    setPage(1);
-  };
+  const clearFilters = () => { setTitle(""); setCity(""); setDifficulty(""); setPage(1); };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -42,40 +30,9 @@ export default function ToursPage() {
       <p className="text-sm text-gray-500 mb-6">Guided experiences from local providers</p>
 
       <FilterBar onClear={clearFilters} hasActiveFilters={hasActiveFilters}>
-        <div className="w-56">
-          <FormInput
-            label="Search"
-            placeholder="Search tours"
-            value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-        <div className="w-44">
-          <FormInput
-            label="City"
-            placeholder="e.g. Luxor"
-            value={city}
-            onChange={(e) => {
-              setCity(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
-        <div className="w-44">
-          <Select
-            label="Difficulty"
-            placeholder="Any"
-            options={difficultyOptions}
-            value={difficulty}
-            onChange={(e) => {
-              setDifficulty(e.target.value);
-              setPage(1);
-            }}
-          />
-        </div>
+        <div className="w-56"><FormInput label="Search" placeholder="Search tours" value={title} onChange={(e) => { setTitle(e.target.value); setPage(1); }} /></div>
+        <div className="w-44"><FormInput label="City" placeholder="e.g. Luxor" value={city} onChange={(e) => { setCity(e.target.value); setPage(1); }} /></div>
+        <div className="w-44"><Select label="Difficulty" placeholder="Any" options={difficultyOptions} value={difficulty} onChange={(e) => { setDifficulty(e.target.value); setPage(1); }} /></div>
       </FilterBar>
 
       <ListingGrid
@@ -86,11 +43,8 @@ export default function ToursPage() {
         emptyIcon={MapPin}
         emptyTitle="No tours found"
         emptyDescription="Try a different search or clear your filters."
-        renderItem={(tour) => {
-          const avgRating =
-            tour.reviews.length > 0
-              ? tour.reviews.reduce((s, r) => s + r.rating, 0) / tour.reviews.length
-              : 0;
+        renderItem={(tour, index) => {
+          const avgRating = tour.reviews.length > 0 ? tour.reviews.reduce((s, r) => s + r.rating, 0) / tour.reviews.length : 0;
           return (
             <ListingCard
               href={`/tours/${tour._id}`}
@@ -101,21 +55,14 @@ export default function ToursPage() {
               reviewCount={tour.reviews.length}
               price={formatPrice(tour.priceTiers[0]?.price ?? 0)}
               priceLabel="From"
+              priority={index === 0}
               favoriteButton={<FavoriteButton category="tours" itemId={tour._id} />}
             />
           );
         }}
       />
 
-      {data?.pagination && (
-        <div className="mt-8">
-          <Pagination
-            page={data.pagination.page}
-            pages={data.pagination.pages}
-            onPageChange={setPage}
-          />
-        </div>
-      )}
+      {data?.pagination && <div className="mt-8"><Pagination page={data.pagination.page} pages={data.pagination.pages} onPageChange={setPage} /></div>}
     </div>
   );
 }
