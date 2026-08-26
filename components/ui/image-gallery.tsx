@@ -12,24 +12,15 @@ interface ImageGalleryProps {
 }
 
 /**
- * Used on any service detail page with a gallery array (Hotel.gallery,
- * Tour.gallery, Package.gallery). Handles the empty/missing-image case so
- * pages don't each need their own fallback UI.
- *
- * NOTE (Stage 2): the image domains (Cloudinary) will need to be added to
- * next.config.js images.remotePatterns for next/image to load them.
+ * Used on service detail pages with a gallery array. The active hero image is
+ * above the fold, so it is prioritized; thumbnails stay lazy-loaded.
  */
 export default function ImageGallery({ images, alt, className }: ImageGalleryProps) {
   const [active, setActive] = useState(0);
 
   if (!images || images.length === 0) {
     return (
-      <div
-        className={cn(
-          "aspect-[16/10] bg-gray-100 rounded-xl flex items-center justify-center",
-          className
-        )}
-      >
+      <div className={cn("aspect-[16/10] bg-gray-100 rounded-xl flex items-center justify-center", className)}>
         <ImageOff className="w-8 h-8 text-gray-300" />
       </div>
     );
@@ -42,6 +33,7 @@ export default function ImageGallery({ images, alt, className }: ImageGalleryPro
           src={images[active]}
           alt={`${alt} ${active + 1}`}
           fill
+          sizes="(max-width: 1024px) calc(100vw - 2rem), 1024px"
           className="object-cover"
           priority
         />
@@ -76,7 +68,13 @@ export default function ImageGallery({ images, alt, className }: ImageGalleryPro
                 active === idx ? "border-gray-900" : "border-transparent opacity-70 hover:opacity-100"
               )}
             >
-              <Image src={img} alt={`${alt} thumbnail ${idx + 1}`} fill className="object-cover" />
+              <Image
+                src={img}
+                alt={`${alt} thumbnail ${idx + 1}`}
+                fill
+                sizes="64px"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>
