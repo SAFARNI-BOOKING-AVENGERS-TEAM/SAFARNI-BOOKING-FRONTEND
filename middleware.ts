@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
   "/packages",
   "/esim",
   "/search",
+  "/ai-search",
 ];
 
 function isPublicPath(pathname: string): boolean {
