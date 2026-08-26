@@ -75,13 +75,14 @@ export default function HotelsPage() {
         emptyIcon={Building2}
         emptyTitle="No hotels found"
         emptyDescription="Try a different city or clear your filters."
-        renderItem={(hotel) => (
+        renderItem={(hotel, index) => (
           <ListingCard
             href={`/hotels/${hotel._id}`}
             image={hotel.gallery[0]?.url}
             title={hotel.name}
             subtitle={hotel.location?.city}
             rating={hotel.rating}
+            priority={index === 0}
             favoriteButton={<FavoriteButton category="hotels" itemId={hotel._id} />}
           />
         )}
