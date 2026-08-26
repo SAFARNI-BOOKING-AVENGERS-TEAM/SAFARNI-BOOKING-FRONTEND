@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, AlertTriangle, Loader2, Smartphone, Calendar } from "lucide-react";
+import { CheckCircle2, AlertTriangle, Loader2, Smartphone, Calendar, RefreshCw } from "lucide-react";
 import { Card, CardContent, Button } from "@/components/ui";
 import { paymentsApi } from "@/lib/api/payments";
 import { esimApi } from "@/lib/api/esim";
@@ -22,7 +22,7 @@ function SuccessContent() {
     queryKey: ["payments", "checkout", sessionId],
     queryFn: () => paymentsApi.verifyCheckoutSession(sessionId),
     enabled: !!sessionId,
-    retry: 2,
+    retry: 1,
   });
 
   const verification = verificationQuery.data?.data;
@@ -58,8 +58,17 @@ function SuccessContent() {
         <CardContent className="p-6">
           <AlertTriangle className="w-10 h-10 text-amber-500" />
           <h1 className="text-xl font-bold text-gray-900 mt-4">We couldn't verify this payment yet</h1>
-          <p className="text-sm text-gray-500 mt-2">Your card may still be processing. Check your bookings or eSIM orders before trying to pay again.</p>
-          <div className="flex gap-3 mt-5">
+          <p className="text-sm text-gray-500 mt-2">
+            The payment may already be complete. SAFARNI will not ask you to pay again until verification succeeds.
+          </p>
+          <div className="flex gap-3 mt-5 flex-wrap">
+            <Button
+              onClick={() => verificationQuery.refetch()}
+              isLoading={verificationQuery.isFetching}
+              leftIcon={<RefreshCw className="w-4 h-4" />}
+            >
+              Retry verification
+            </Button>
             <Link href="/bookings"><Button variant="outline">My bookings</Button></Link>
             <Link href="/esim-orders"><Button variant="outline">My eSIMs</Button></Link>
           </div>
