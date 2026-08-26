@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Plane } from "lucide-react";
+import Link from "next/link";
+import { Plane, Sparkles, ArrowRight } from "lucide-react";
 import { useFlights } from "@/lib/hooks/use-flights";
 import { FormInput, Select, Skeleton, EmptyState } from "@/components/ui";
 import FlightCard from "@/components/services/flight-card";
@@ -32,8 +33,22 @@ export default function FlightsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Flights</h1>
-      <p className="text-sm text-gray-500 mb-6">Search flights by route and date</p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Flights</h1>
+          <p className="text-sm text-gray-500">Search SAFARNI flight inventory by route and date</p>
+        </div>
+        <Link
+          href="/ai-search"
+          className="inline-flex items-center gap-2 rounded-xl bg-gray-900 text-white px-4 py-2.5 text-sm font-medium hover:bg-gray-800 transition-colors"
+        >
+          <Sparkles className="w-4 h-4" /> Search live deals with AI <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <div className="mb-6 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+        <span className="font-medium text-gray-900">Two ways to search:</span> use the filters below for flights listed directly on SAFARNI, or use Ask SAFARNI to compare live external flight offers through our n8n search workflow.
+      </div>
 
       <FilterBar onClear={clearFilters} hasActiveFilters={hasActiveFilters}>
         <div className="w-36">
