@@ -63,6 +63,14 @@ export interface StripeDiagnostics {
   message: string;
 }
 
+export interface AISearchDiagnostics {
+  aiConfigured: boolean;
+  aiModel: string;
+  n8nConfigured: boolean;
+  webhookSecretConfigured: boolean;
+  cacheTtlSeconds: number;
+}
+
 const params = (values: Record<string, string | number | undefined>) => ({
   params: Object.fromEntries(Object.entries(values).filter(([, value]) => value !== undefined && value !== "")),
 });
@@ -114,6 +122,10 @@ export const adminApi = {
   },
   getStripeStatus: async () => {
     const res = await apiClient.get<ApiResponse<StripeDiagnostics>>("/payments/status");
+    return res.data;
+  },
+  getAISearchStatus: async () => {
+    const res = await apiClient.get<ApiResponse<AISearchDiagnostics>>("/ai-search/status");
     return res.data;
   },
 };
