@@ -10,6 +10,8 @@ import { paymentsApi, type PaymentTarget } from "@/lib/api/payments";
 import { useToast } from "@/lib/hooks/use-toast";
 import { getApiErrorMessage } from "@/lib/api/error";
 
+const LAST_CHECKOUT_SESSION_KEY = "safarni:last-checkout-session";
+
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const toast = useToast();
@@ -26,6 +28,17 @@ function CheckoutContent() {
   const checkoutMutation = useMutation({
     mutationFn: () => paymentsApi.createCheckoutSession(target),
     onSuccess: (response) => {
+      // Keep a local copy of the real Stripe Checkout Session ID before
+      // navigating away from SAFARNI. Stripe normally returns it in the
+      // success_url query string, but this gives us a safe recovery path if a
+      // browser/router strips that query parameter on the return navigation.
+      try {
+        sessionStorage.setItem(LAST_CHECKOUT_SESSION_KEY, response.data.sessionId);
+      } catch {
+        // Storage can be unavailable in hardened/private browser contexts.
+        // Stripe's success_url query parameter remains the primary mechanism.
+      }
+
       window.location.assign(response.data.url);
     },
     onError: (error) => toast.error("Couldn't start checkout", getApiErrorMessage(error)),
