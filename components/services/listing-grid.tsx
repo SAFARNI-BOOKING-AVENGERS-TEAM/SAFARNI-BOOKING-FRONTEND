@@ -7,7 +7,7 @@ interface ListingGridProps<T> {
   items?: T[];
   isLoading: boolean;
   isError?: boolean;
-  renderItem: (item: T) => React.ReactNode;
+  renderItem: (item: T, index: number) => React.ReactNode;
   keyExtractor: (item: T) => string;
   skeletonCount?: number;
   emptyIcon?: LucideIcon;
@@ -58,8 +58,8 @@ export default function ListingGrid<T>({
 
   return (
     <div className={`grid ${columns} gap-5`}>
-      {items.map((item) => (
-        <div key={keyExtractor(item)}>{renderItem(item)}</div>
+      {items.map((item, index) => (
+        <div key={keyExtractor(item)}>{renderItem(item, index)}</div>
       ))}
     </div>
   );
