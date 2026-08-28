@@ -20,10 +20,13 @@ const sizeStyles = {
 };
 
 export default function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
-  // Avoids a hydration mismatch — createPortal needs document, which
-  // doesn't exist during server render.
+  // createPortal needs document, which is unavailable during server render.
+  // This mount flag intentionally switches the portal on after hydration.
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount detection is required before createPortal can access document
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
