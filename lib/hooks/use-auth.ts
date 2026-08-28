@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
@@ -70,6 +69,8 @@ export function useAuth() {
     onSuccess: () => {
       dispatch(clearUser());
       queryClient.clear();
+      // Full reload is intentional here so every in-memory client store is reset after logout.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/login";
     },
   });
