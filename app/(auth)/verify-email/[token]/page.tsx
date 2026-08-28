@@ -14,18 +14,13 @@ export default function VerifyEmailPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (!token) {
-      setStatus("error");
-      setMessage("Invalid verification link");
-      return;
-    }
+    if (!token) return;
 
     authApi
       .verifyEmail(token)
       .then((res) => {
         setStatus("success");
         setMessage(res.message);
-        // Auto-redirect to login after 3 seconds
         setTimeout(() => router.push("/login"), 3000);
       })
       .catch((err) => {
@@ -36,9 +31,12 @@ export default function VerifyEmailPage() {
       });
   }, [token, router]);
 
+  const displayStatus = token ? status : "error";
+  const displayMessage = token ? message : "Invalid verification link";
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
-      {status === "loading" && (
+      {displayStatus === "loading" && (
         <>
           <Loader2 className="w-10 h-10 text-gray-900 mx-auto mb-4 animate-spin" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -50,26 +48,26 @@ export default function VerifyEmailPage() {
         </>
       )}
 
-      {status === "success" && (
+      {displayStatus === "success" && (
         <>
           <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Email verified!
           </h2>
-          <p className="text-sm text-gray-600 mb-4">{message}</p>
+          <p className="text-sm text-gray-600 mb-4">{displayMessage}</p>
           <p className="text-sm text-gray-500">
             Redirecting you to sign in...
           </p>
         </>
       )}
 
-      {status === "error" && (
+      {displayStatus === "error" && (
         <>
           <XCircle className="w-10 h-10 text-red-600 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
             Verification failed
           </h2>
-          <p className="text-sm text-gray-600 mb-4">{message}</p>
+          <p className="text-sm text-gray-600 mb-4">{displayMessage}</p>
           <Link
             href="/login"
             className="inline-block text-sm font-medium text-gray-900 hover:underline"

@@ -5,3 +5,4 @@ export * from "./notification";
 export * from "./favorite";
 export * from "./api";
 export * from "./responses";
+export * from "./ai-search";

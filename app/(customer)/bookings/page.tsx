@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, Car as CarIcon, Plane, MapPin, X, Calendar } from "lucide-react";
+import { Building2, Car as CarIcon, Plane, MapPin, X, Calendar, CreditCard } from "lucide-react";
 import { useMyBookings, useCancelBooking } from "@/lib/hooks/use-bookings";
 import { useBookingItem } from "@/lib/hooks/use-booking-item";
 import { useToast } from "@/lib/hooks/use-toast";
@@ -18,9 +18,7 @@ const categoryIcon: Record<BookingCategory, typeof Building2> = {
 };
 
 function bookingTitle(booking: Booking, item: ReturnType<typeof useBookingItem>["data"]) {
-  if (!item || !item.data) {
-    return booking.category === "hotels" ? "Hotel room booking" : "Item unavailable";
-  }
+  if (!item || !item.data) return booking.category === "hotels" ? "Hotel room booking" : "Item unavailable";
   if (item.kind === "tours") return item.data.title;
   if (item.kind === "cars") return `${item.data.brand} ${item.data.model}`;
   if (item.kind === "flights") return `${item.data.airline} ${item.data.flightNumber}`;
@@ -43,6 +41,9 @@ function BookingCard({ booking }: { booking: Booking }) {
   const title = isLoading ? "Loading…" : bookingTitle(booking, item);
   const href = bookingHref(booking, item);
   const canCancel = booking.status !== "cancelled";
+  const checkoutHref = booking.packageBookingId
+    ? `/checkout?packageBookingId=${encodeURIComponent(booking.packageBookingId)}`
+    : `/checkout?bookingId=${encodeURIComponent(booking._id)}`;
 
   const handleCancel = () => {
     cancelBooking.mutate(booking._id, {
@@ -60,21 +61,23 @@ function BookingCard({ booking }: { booking: Booking }) {
           </div>
           <div className="min-w-0">
             {href ? (
-              <Link href={href} className="text-sm font-medium text-gray-900 hover:underline">
-                {title}
-              </Link>
+              <Link href={href} className="text-sm font-medium text-gray-900 hover:underline">{title}</Link>
             ) : (
               <p className="text-sm font-medium text-gray-900">{title}</p>
             )}
-            <p className="text-xs text-gray-500 mt-0.5">
-              {formatDate(booking.startDate)} — {formatDate(booking.endDate)}
-            </p>
+            <p className="text-xs text-gray-500 mt-0.5">{formatDate(booking.startDate)} — {formatDate(booking.endDate)}</p>
+            {booking.packageBookingId && <p className="text-xs text-gray-400 mt-0.5">Part of a package booking</p>}
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
           <Badge status={booking.status}>{booking.status}</Badge>
-          <span className="text-sm font-semibold text-gray-900">{formatPrice(booking.totalPrice)}</span>
+          <span className="text-sm font-semibold text-gray-900 mx-1">{formatPrice(booking.totalPrice)}</span>
+          {booking.status === "pending" && (
+            <Link href={checkoutHref}>
+              <Button size="sm" leftIcon={<CreditCard className="w-3.5 h-3.5" />}>Pay now</Button>
+            </Link>
+          )}
           {canCancel && (
             <Button
               variant="ghost"
@@ -101,27 +104,17 @@ export default function BookingsPage() {
       <p className="text-sm text-gray-500 mb-6">Everything you&apos;ve booked, in one place</p>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-xl" />
-          ))}
-        </div>
+        <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>
       ) : isError ? (
         <EmptyState title="Couldn't load your bookings" description="Please try again." />
       ) : !data?.data.length ? (
-        <EmptyState
-          icon={Calendar}
-          title="No bookings yet"
-          description="Once you book a hotel, tour, car, or flight, it'll show up here."
-        />
+        <EmptyState icon={Calendar} title="No bookings yet" description="Once you book a hotel, tour, car, or flight, it'll show up here." />
       ) : (
         <div className="space-y-3">
           {data.data
             .slice()
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-            .map((booking) => (
-              <BookingCard key={booking._id} booking={booking} />
-            ))}
+            .map((booking) => <BookingCard key={booking._id} booking={booking} />)}
         </div>
       )}
     </div>

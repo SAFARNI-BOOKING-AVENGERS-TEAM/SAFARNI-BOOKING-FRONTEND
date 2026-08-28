@@ -10,7 +10,7 @@ export const favoriteApi = {
   },
 
   addFavorite: async (category: FavoriteCategory, itemId: string) => {
-    const res = await apiClient.post<ApiResponse<any>>("/favorites", { category, itemId });
+    const res = await apiClient.post<ApiResponse<unknown>>("/favorites", { category, itemId });
     return res.data;
   },
 

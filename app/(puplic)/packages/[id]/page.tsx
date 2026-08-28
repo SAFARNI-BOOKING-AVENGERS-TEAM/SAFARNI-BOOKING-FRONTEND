@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Building2, Car, Plane, MapPin } from "lucide-react";
 import { usePackageDetails } from "@/lib/hooks/use-packages";
@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { Card, CardContent, Badge, Button, Skeleton, EmptyState } from "@/components/ui";
 import PackageBookingModal from "@/components/services/package-booking-modal";
 import { formatPrice } from "@/lib/utils";
+import type { PackageResolvedItem } from "@/types";
 
 const categoryIcon: Record<string, typeof Building2> = {
   hotels: Building2,
@@ -17,8 +18,22 @@ const categoryIcon: Record<string, typeof Building2> = {
   tours: MapPin,
 };
 
+function packageItemLabel(entry: PackageResolvedItem) {
+  if (entry.category === "hotels") {
+    return `${entry.hotel?.name ?? "Hotel"} — ${entry.room?.name ?? ""}`;
+  }
+
+  const item = entry.item;
+  if (!item) return "Item";
+  if ("title" in item) return item.title;
+  if ("brand" in item) return item.brand;
+  if ("flightNumber" in item) return item.flightNumber;
+  return "Item";
+}
+
 export default function PackageDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const { data, isLoading, isError } = usePackageDetails(id);
@@ -48,7 +63,7 @@ export default function PackageDetailPage() {
 
   const handleBook = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/packages/${id}`;
+      router.push(`/login?redirect=/packages/${id}`);
       return;
     }
     setModalOpen(true);
@@ -76,13 +91,7 @@ export default function PackageDetailPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-2">What&apos;s included</h2>
           {items.map((entry, i) => {
             const Icon = categoryIcon[entry.category] ?? MapPin;
-            const label =
-              entry.category === "hotels"
-                ? `${entry.hotel?.name ?? "Hotel"} — ${entry.room?.name ?? ""}`
-                : (entry.item as any)?.title ||
-                  (entry.item as any)?.brand ||
-                  (entry.item as any)?.flightNumber ||
-                  "Item";
+            const label = packageItemLabel(entry);
             return (
               <Card key={i}>
                 <CardContent className="p-4 flex items-center gap-3">

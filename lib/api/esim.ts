@@ -1,13 +1,25 @@
 "use client";
 
 import { apiClient } from "./client";
-import type { PaginatedResponse, ApiResponse, ESIMPlan } from "@/types";
+import type { PaginatedResponse, ApiResponse, ESIMPlan, ESIMOrder, DataUnit } from "@/types";
 
 export interface ESIMListParams {
   country?: string;
   region?: string;
   page?: number;
   limit?: number;
+  mine?: boolean;
+}
+
+export interface ESIMPlanWritePayload {
+  name: string;
+  country: string;
+  region?: string;
+  dataAmount: number;
+  dataUnit: DataUnit;
+  validityDays: number;
+  price: number;
+  currency: string;
 }
 
 export const esimApi = {
@@ -21,12 +33,12 @@ export const esimApi = {
     return res.data;
   },
 
-  createPlan: async (payload: any) => {
+  createPlan: async (payload: ESIMPlanWritePayload) => {
     const res = await apiClient.post<ApiResponse<ESIMPlan>>("/esim/plans", payload);
     return res.data;
   },
 
-  updatePlan: async (id: string, payload: any) => {
+  updatePlan: async (id: string, payload: ESIMPlanWritePayload) => {
     const res = await apiClient.patch<ApiResponse<ESIMPlan>>(`/esim/plans/${id}`, payload);
     return res.data;
   },
@@ -37,9 +49,35 @@ export const esimApi = {
   },
 
   updatePlanStatus: async (id: string, status: "approved" | "rejected") => {
-    const res = await apiClient.patch<ApiResponse<ESIMPlan>>(`/esim/plans/${id}/status`, {
-      status,
+    const res = await apiClient.patch<ApiResponse<ESIMPlan>>(`/esim/plans/${id}/status`, { status });
+    return res.data;
+  },
+
+  createOrder: async (planId: string, packageBookingId?: string) => {
+    const res = await apiClient.post<ApiResponse<ESIMOrder>>("/esim/orders", {
+      planId,
+      ...(packageBookingId && { packageBookingId }),
     });
+    return res.data;
+  },
+
+  getMyOrders: async () => {
+    const res = await apiClient.get<ApiResponse<ESIMOrder[]>>("/esim/orders/my-orders");
+    return res.data;
+  },
+
+  getOrderDetails: async (id: string) => {
+    const res = await apiClient.get<ApiResponse<ESIMOrder>>(`/esim/orders/${id}`);
+    return res.data;
+  },
+
+  retryProvision: async (id: string) => {
+    const res = await apiClient.post<ApiResponse<ESIMOrder>>(`/esim/orders/${id}/retry-provision`);
+    return res.data;
+  },
+
+  activateOrder: async (id: string) => {
+    const res = await apiClient.patch<ApiResponse<ESIMOrder>>(`/esim/orders/${id}/activate`);
     return res.data;
   },
 };

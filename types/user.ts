@@ -14,9 +14,11 @@ export interface User {
   providerType?: ProviderType;
   isVerified: boolean;
   profilePicture?: ProfilePicture;
-  refreshTokenVersion: number;
-  createdAt: string;
-  updatedAt: string;
+  // These fields are present on the full profile response but are not part of
+  // the compact user payload returned by POST /auth/login.
+  refreshTokenVersion?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PublicUser {

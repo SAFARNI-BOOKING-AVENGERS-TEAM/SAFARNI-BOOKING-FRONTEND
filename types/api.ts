@@ -1,3 +1,5 @@
+import type { ProfilePicture, ProviderType, UserRole } from "./user";
+
 export interface ApiResponse<T = unknown> {
   message: string;
   statusCode: number;
@@ -23,7 +25,7 @@ export interface ApiError {
   success: false;
   message: string;
   statusCode: number;
-  cause?: any;
+  cause?: unknown;
   stack?: string;
 }
 
@@ -35,7 +37,7 @@ export interface ListQueryParams {
   name?: string;
   title?: string;
   status?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ─── Auth ───
@@ -55,8 +57,10 @@ export interface AuthResponse {
     id: string;
     name: string;
     email: string;
-    role: string;
+    role: UserRole;
+    providerType?: ProviderType;
     isVerified: boolean;
+    profilePicture?: ProfilePicture;
   };
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Plane, Clock } from "lucide-react";
 import { useFlightDetails } from "@/lib/hooks/use-flights";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -12,6 +12,7 @@ import { formatPrice, formatDate, formatTime } from "@/lib/utils";
 
 export default function FlightDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const { data, isLoading, isError } = useFlightDetails(id);
@@ -41,7 +42,7 @@ export default function FlightDetailPage() {
 
   const handleReserve = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/flights/${id}`;
+      router.push(`/login?redirect=/flights/${id}`);
       return;
     }
     setModalOpen(true);

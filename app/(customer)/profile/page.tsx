@@ -18,10 +18,47 @@ const profileSchema = z.object({
 
 type ProfileForm = z.infer<typeof profileSchema>;
 
+function getSafeProfileImageUrl(value?: string): string | null {
+  const raw = value?.trim();
+  if (!raw) return null;
+
+  const normalized = raw.replace(/\\/g, "/");
+
+  // Accept only valid absolute http(s) URLs as-is.
+  if (/^https?:\/\//i.test(normalized)) {
+    try {
+      return new URL(normalized).toString();
+    } catch {
+      return null;
+    }
+  }
+
+  // Support legacy locally stored values such as:
+  // "uploads/image-123.jpg", "./uploads/image-123.jpg", or "/uploads/image-123.jpg".
+  const withoutLeadingDot = normalized.replace(/^\.\//, "");
+  const uploadPath = withoutLeadingDot.startsWith("/uploads/")
+    ? withoutLeadingDot
+    : withoutLeadingDot.startsWith("uploads/")
+      ? `/${withoutLeadingDot}`
+      : null;
+
+  if (!uploadPath) return null;
+
+  const apiBase = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+  if (!apiBase) return null;
+
+  try {
+    return new URL(uploadPath, `${apiBase}/`).toString();
+  } catch {
+    return null;
+  }
+}
+
 export default function ProfilePage() {
   const { user, isLoading, updateProfile, uploadAvatar } = useUser();
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const profileImageUrl = getSafeProfileImageUrl(user?.profilePicture?.url);
 
   const {
     register,
@@ -77,8 +114,8 @@ export default function ProfilePage() {
         <CardContent className="p-6 flex items-center gap-4">
           <div className="relative">
             <div className="relative w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-              {user?.profilePicture?.url ? (
-                <Image src={user.profilePicture.url} alt={user.name} fill className="object-cover" />
+              {profileImageUrl ? (
+                <Image src={profileImageUrl} alt={user?.name || "Profile picture"} fill className="object-cover" />
               ) : (
                 <span className="text-xl font-semibold text-gray-400">
                   {user?.name?.[0]?.toUpperCase()}

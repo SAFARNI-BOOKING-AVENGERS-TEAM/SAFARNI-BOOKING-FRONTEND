@@ -1,20 +1,32 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
 import { Smartphone, Globe, CalendarClock } from "lucide-react";
 import { useESIMPlanDetails } from "@/lib/hooks/use-esim";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useToast } from "@/lib/hooks/use-toast";
+import { esimApi } from "@/lib/api/esim";
+import { getApiErrorMessage } from "@/lib/api/error";
 import { Card, CardContent, Button, Skeleton, EmptyState } from "@/components/ui";
 import { formatPrice } from "@/lib/utils";
 
 export default function ESIMDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const { data, isLoading, isError } = useESIMPlanDetails(id);
   const { isAuthenticated } = useAuth();
   const toast = useToast();
+
+  const orderMutation = useMutation({
+    mutationFn: () => esimApi.createOrder(id),
+    onSuccess: (response) => {
+      router.push(`/checkout?esimOrderId=${encodeURIComponent(response.data._id)}`);
+    },
+    onError: (error) => toast.error("Couldn't create eSIM order", getApiErrorMessage(error)),
+  });
 
   if (isLoading) {
     return (
@@ -36,10 +48,10 @@ export default function ESIMDetailPage() {
 
   const handleBuy = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/esim/${id}`;
+      router.push(`/login?redirect=/esim/${id}`);
       return;
     }
-    toast.info("Checkout is coming soon", "This plan has been noted — checkout isn't wired up yet.");
+    orderMutation.mutate();
   };
 
   return (
@@ -59,9 +71,7 @@ export default function ESIMDetailPage() {
           <div className="grid grid-cols-2 gap-4 mt-6">
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-xs text-gray-500 mb-1">Data</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {plan.dataAmount} {plan.dataUnit}
-              </p>
+              <p className="text-lg font-semibold text-gray-900">{plan.dataAmount} {plan.dataUnit}</p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="flex items-center gap-1 text-xs text-gray-500 mb-1">
@@ -72,10 +82,8 @@ export default function ESIMDetailPage() {
           </div>
 
           <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-100">
-            <span className="text-2xl font-bold text-gray-900">
-              {formatPrice(plan.price, plan.currency)}
-            </span>
-            <Button onClick={handleBuy}>Buy this plan</Button>
+            <span className="text-2xl font-bold text-gray-900">{formatPrice(plan.price, plan.currency)}</span>
+            <Button onClick={handleBuy} isLoading={orderMutation.isPending}>Buy this plan</Button>
           </div>
         </CardContent>
       </Card>

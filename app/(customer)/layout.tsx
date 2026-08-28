@@ -2,34 +2,29 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
 import Navbar from "@/components/layout/navbar";
 import Sidebar from "@/components/layout/sidebar";
-import RoleGuardLayout from "@/components/layout/role-guard-layout";
-
+import { useAuth } from "@/lib/hooks/use-auth";
 
 const customerLinks = [
   { href: "/dashboard", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/bookings", label: "My Bookings", icon: "Calendar" },
+  { href: "/esim-orders", label: "My eSIMs", icon: "Smartphone" },
   { href: "/favorites", label: "Favorites", icon: "Heart" },
   { href: "/notifications", label: "Notifications", icon: "Bell" },
   { href: "/profile", label: "Profile", icon: "User" },
 ];
 
-export default function CustomerLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user } = useSelector(
-    (state: RootState) => state.auth
-  );
+  // Important: useAuth performs the /users/my-profile bootstrap. This is
+  // required after external full-page redirects (for example Stripe Checkout),
+  // because the in-memory Redux store starts fresh when the browser returns.
+  const { isAuthenticated, isLoading, user } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+      router.replace("/login");
     }
   }, [isLoading, isAuthenticated, router]);
 
@@ -41,9 +36,7 @@ export default function CustomerLayout({
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -54,9 +47,4 @@ export default function CustomerLayout({
       </div>
     </div>
   );
-  {
-  // No allowedRoles passed — any authenticated user can be here,
-  // matching the original layout's behavior exactly.
-  return <RoleGuardLayout links={customerLinks}>{children}</RoleGuardLayout>;
-}
 }

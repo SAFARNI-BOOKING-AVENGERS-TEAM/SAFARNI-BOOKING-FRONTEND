@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { packageApi } from "@/lib/api/packages";
-import type { BookingCategory } from "@/types";
+import type { PackageBookingItemInput } from "@/lib/api/packages";
 
 export function usePackages() {
   return useQuery({
@@ -35,15 +35,7 @@ export function useBookPackage(packageId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (
-      items: {
-        category: BookingCategory;
-        itemId: string;
-        startDate: string;
-        endDate: string;
-        details?: any;
-      }[]
-    ) => packageApi.bookPackage(packageId, items),
+    mutationFn: (items: PackageBookingItemInput[]) => packageApi.bookPackage(packageId, items),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       // A package can include flights, which have live seat counts.

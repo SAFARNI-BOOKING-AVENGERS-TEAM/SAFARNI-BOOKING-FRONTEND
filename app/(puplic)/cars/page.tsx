@@ -39,21 +39,10 @@ export default function CarsPage() {
 
       <FilterBar onClear={clearFilters} hasActiveFilters={hasActiveFilters}>
         <div className="w-48">
-          <FormInput
-            label="City"
-            placeholder="e.g. Cairo"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
+          <FormInput label="City" placeholder="e.g. Cairo" value={city} onChange={(e) => setCity(e.target.value)} />
         </div>
         <div className="w-44">
-          <Select
-            label="Type"
-            placeholder="Any type"
-            options={typeOptions}
-            value={type}
-            onChange={(e) => setType(e.target.value)}
-          />
+          <Select label="Type" placeholder="Any type" options={typeOptions} value={type} onChange={(e) => setType(e.target.value)} />
         </div>
       </FilterBar>
 
@@ -65,7 +54,7 @@ export default function CarsPage() {
         emptyIcon={CarIcon}
         emptyTitle="No cars found"
         emptyDescription="Try a different city or type."
-        renderItem={(car) => (
+        renderItem={(car, index) => (
           <ListingCard
             href={`/cars/${car._id}`}
             image={car.image}
@@ -73,12 +62,9 @@ export default function CarsPage() {
             subtitle={car.location?.city}
             price={formatPrice(car.pricePerDay)}
             priceSuffix="/day"
+            priority={index === 0}
             favoriteButton={<FavoriteButton category="cars" itemId={car._id} />}
-            footer={
-              <span className="text-xs text-gray-500">
-                {car.type} · {car.transmission}
-              </span>
-            }
+            footer={<span className="text-xs text-gray-500">{car.type} · {car.transmission}</span>}
           />
         )}
       />

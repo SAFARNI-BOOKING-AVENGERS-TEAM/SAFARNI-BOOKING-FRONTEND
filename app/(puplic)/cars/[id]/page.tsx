@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Users, Fuel, Settings2, MapPin, ImageOff } from "lucide-react";
 import { useCarDetails } from "@/lib/hooks/use-cars";
@@ -13,6 +13,7 @@ import { formatPrice } from "@/lib/utils";
 
 export default function CarDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const { data, isLoading, isError } = useCarDetails(id);
@@ -44,7 +45,7 @@ export default function CarDetailPage() {
 
   const handleReserve = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/cars/${id}`;
+      router.push(`/login?redirect=/cars/${id}`);
       return;
     }
     setModalOpen(true);

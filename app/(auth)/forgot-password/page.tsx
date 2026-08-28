@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { authApi } from "@/lib/api/auth";
 import FormInput from "@/components/ui/form-input";
-import { Loader2, Mail, ArrowLeft } from "lucide-react";
+import { Mail, ArrowLeft } from "lucide-react";
 
 const forgotSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
