@@ -7,7 +7,7 @@ import type { RootState, AppDispatch } from "@/store";
 import { setUser, clearUser } from "@/store/slices/authSlice";
 import { authApi } from "@/lib/api/auth";
 import { usersApi } from "@/lib/api/users";
-import type { LoginCredentials, RegisterCredentials } from "@/types";
+import type { LoginCredentials, RegisterCredentials, User } from "@/types";
 
 const AUTH_ENTRY_PATHS = ["/login", "/register", "/forgot-password"];
 
@@ -17,6 +17,18 @@ function shouldSkipProfileBootstrap(pathname: string): boolean {
     pathname.startsWith("/reset-password/") ||
     pathname.startsWith("/verify-email/")
   );
+}
+
+function toSessionUser(user: Awaited<ReturnType<typeof authApi.login>>["data"]["user"]): User {
+  return {
+    _id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    providerType: user.providerType,
+    isVerified: user.isVerified,
+    profilePicture: user.profilePicture,
+  };
 }
 
 export function useAuth() {
@@ -50,9 +62,10 @@ export function useAuth() {
   const login = useMutation({
     mutationFn: (credentials: LoginCredentials) => authApi.login(credentials),
     onSuccess: (res) => {
-      // Backend returns user in login response — no need for an extra fetch.
+      // Backend returns a compact session user in the login response, so map
+      // its `id` field to the `_id` shape used by the frontend store.
       if (res.data?.user) {
-        dispatch(setUser(res.data.user as any));
+        dispatch(setUser(toSessionUser(res.data.user)));
       }
       queryClient.invalidateQueries({ queryKey: ["user"] });
     },
