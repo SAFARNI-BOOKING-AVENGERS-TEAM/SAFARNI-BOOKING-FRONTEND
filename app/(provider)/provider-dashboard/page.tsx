@@ -45,7 +45,7 @@ export default function ProviderDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <MetricCard href="/my-services" icon={<Briefcase className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : totalServices} label="My services" />
         <MetricCard href="/provider-bookings" icon={<Calendar className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : totalOperations} label="Bookings & orders" />
-        <MetricCard href="/earnings" icon={<DollarSign className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : formatPrice(stats?.revenue.total ?? 0)} label="Paid revenue" />
+        <MetricCard href="/earnings" icon={<DollarSign className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : formatPrice(stats?.earnings.totalProviderEarnings ?? 0)} label="Net earnings" />
         <MetricCard href="/my-services" icon={<Clock3 className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : pendingServices} label="Pending approval" />
       </div>
 
