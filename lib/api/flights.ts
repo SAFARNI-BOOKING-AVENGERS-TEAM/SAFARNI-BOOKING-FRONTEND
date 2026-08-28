@@ -10,6 +10,8 @@ export interface FlightListParams {
   class?: string;
 }
 
+type FlightWritePayload = Record<string, unknown>;
+
 export const flightApi = {
   // Same status-filtering gap as cars — see useFlights().
   getFlights: async (params: FlightListParams = {}) => {
@@ -22,12 +24,12 @@ export const flightApi = {
     return res.data;
   },
 
-  createFlight: async (payload: any) => {
+  createFlight: async (payload: FlightWritePayload) => {
     const res = await apiClient.post<ApiResponse<Flight>>("/flights/createFlight", payload);
     return res.data;
   },
 
-  updateFlight: async (id: string, payload: any) => {
+  updateFlight: async (id: string, payload: FlightWritePayload) => {
     const res = await apiClient.patch<ApiResponse<Flight>>(`/flights/updateFlight/${id}`, payload);
     return res.data;
   },
