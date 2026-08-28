@@ -58,6 +58,30 @@ export interface AdminBooking {
   createdAt: string;
 }
 
+export type CommissionStatus = "pending" | "earned" | "reversal_pending" | "reversed";
+
+export interface AdminCommissionRecord {
+  _id: string;
+  bookingId: string;
+  packageBookingId?: string;
+  paymentId: string;
+  providerId: { _id: string; name?: string; email?: string } | string;
+  category: "tours" | "flights" | "cars" | "hotels";
+  grossAmount: number;
+  commissionRatePercent: number;
+  commissionAmount: number;
+  providerNetAmount: number;
+  currency: string;
+  bookingEndDate: string;
+  status: CommissionStatus;
+  recognizedAt?: string;
+  reversedAt?: string;
+  stripeRefundId?: string;
+  refundAmount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface AuditLog {
   _id: string;
   userEmail: string;
@@ -127,6 +151,10 @@ export const adminApi = {
   },
   updateBookingStatus: async (id: string, status: "pending" | "confirmed" | "cancelled") => {
     const res = await apiClient.patch<ApiResponse<AdminBooking>>(`/admin/bookings/${id}/status`, { status });
+    return res.data;
+  },
+  getCommissions: async (filters: { status?: CommissionStatus | ""; providerId?: string; page?: number } = {}) => {
+    const res = await apiClient.get<ApiResponse<Paginated<AdminCommissionRecord>>>("/admin/commissions", params(filters));
     return res.data;
   },
   getAuditLogs: async (filters: { search?: string; method?: string; success?: string; page?: number } = {}) => {
