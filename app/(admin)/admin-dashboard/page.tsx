@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { Users, Briefcase, Calendar, DollarSign, ArrowRight, ShieldCheck, Clock3, CreditCard, Bot } from "lucide-react";
+import { Users, Briefcase, Calendar, DollarSign, ArrowRight, ShieldCheck, Clock3, CreditCard, Bot, Percent } from "lucide-react";
 import { Card, CardContent, Skeleton } from "@/components/ui";
 import { dashboardApi } from "@/lib/api/dashboard";
 import { adminApi } from "@/lib/api/admin";
@@ -82,11 +82,12 @@ export default function AdminDashboardPage() {
         <Card className="mb-6"><CardContent className="p-5 text-sm text-red-600">Couldn&apos;t load dashboard statistics. Please try again.</CardContent></Card>
       ) : null}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mb-8">
         <MetricCard href="/admin-users" icon={<Users className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : stats?.users.total ?? 0} label="Total users" />
         <MetricCard href="/admin-providers" icon={<Briefcase className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : stats?.users.byRole.provider ?? 0} label="Providers" />
         <MetricCard href="/admin-bookings" icon={<Calendar className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : totalBookings} label="Bookings" />
         <MetricCard href="/admin-bookings" icon={<DollarSign className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : formatPrice(stats?.payments.totalConfirmedRevenue ?? 0)} label="Confirmed revenue" />
+        <MetricCard href="/admin-commissions" icon={<Percent className="w-5 h-5 text-gray-600" />} value={isLoading ? "—" : formatPrice(stats?.commission.commissionEarned ?? 0)} label="SAFARNI commission" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -120,6 +121,15 @@ export default function AdminDashboardPage() {
                 <span className="text-xl font-bold text-gray-900">{isLoading ? "—" : pendingServices}</span>
               </CardContent>
             </Card>
+            <Link href="/admin-commissions" className="block">
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-5 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><Percent className="w-5 h-5 text-gray-600" /></div>
+                  <div className="flex-1"><p className="text-sm font-medium text-gray-900">Refund reversals pending</p><p className="text-xs text-gray-500">Cancelled paid bookings awaiting financial resolution</p></div>
+                  <span className="text-xl font-bold text-gray-900">{isLoading ? "—" : formatPrice(stats?.commission.reversalPendingGross ?? 0)}</span>
+                </CardContent>
+              </Card>
+            </Link>
             <Card>
               <CardContent className="p-5 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center"><ShieldCheck className="w-5 h-5 text-gray-600" /></div>
