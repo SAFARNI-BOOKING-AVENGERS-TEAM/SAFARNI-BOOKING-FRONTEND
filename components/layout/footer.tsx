@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -13,19 +15,19 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-semibold text-white mb-3">Explore</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/tours" className="hover:text-white transition-colors">Tours</a></li>
-              <li><a href="/hotels" className="hover:text-white transition-colors">Hotels</a></li>
-              <li><a href="/flights" className="hover:text-white transition-colors">Flights</a></li>
-              <li><a href="/cars" className="hover:text-white transition-colors">Car Rentals</a></li>
-              <li><a href="/packages" className="hover:text-white transition-colors">Packages</a></li>
+              <li><Link href="/tours" className="hover:text-white transition-colors">Tours</Link></li>
+              <li><Link href="/hotels" className="hover:text-white transition-colors">Hotels</Link></li>
+              <li><Link href="/flights" className="hover:text-white transition-colors">Flights</Link></li>
+              <li><Link href="/cars" className="hover:text-white transition-colors">Car Rentals</Link></li>
+              <li><Link href="/packages" className="hover:text-white transition-colors">Packages</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="text-sm font-semibold text-white mb-3">Account</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/login" className="hover:text-white transition-colors">Sign In</a></li>
-              <li><a href="/register" className="hover:text-white transition-colors">Register</a></li>
-              <li><a href="/dashboard" className="hover:text-white transition-colors">My Dashboard</a></li>
+              <li><Link href="/login" className="hover:text-white transition-colors">Sign In</Link></li>
+              <li><Link href="/register" className="hover:text-white transition-colors">Register</Link></li>
+              <li><Link href="/dashboard" className="hover:text-white transition-colors">My Dashboard</Link></li>
             </ul>
           </div>
         </div>
