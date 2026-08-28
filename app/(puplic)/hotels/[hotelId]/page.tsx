@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Star, MapPin, Users, BedDouble } from "lucide-react";
 import { useHotelDetails } from "@/lib/hooks/use-hotels";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -13,6 +13,7 @@ import type { Room } from "@/types";
 
 export default function HotelDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const hotelId = params.hotelId as string;
 
   const { data, isLoading, isError } = useHotelDetails(hotelId);
@@ -21,7 +22,7 @@ export default function HotelDetailPage() {
 
   const handleReserve = (room: Room) => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/hotels/${hotelId}`;
+      router.push(`/login?redirect=/hotels/${hotelId}`);
       return;
     }
     setBookingRoom(room);
