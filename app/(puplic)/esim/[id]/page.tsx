@@ -48,7 +48,7 @@ export default function ESIMDetailPage() {
 
   const handleBuy = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/esim/${id}`;
+      router.push(`/login?redirect=/esim/${id}`);
       return;
     }
     orderMutation.mutate();
