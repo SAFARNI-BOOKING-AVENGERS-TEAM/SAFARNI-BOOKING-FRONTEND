@@ -55,7 +55,7 @@ export default function MyServicesPage() {
     enabled: !!canManageESIM,
   });
 
-  const plans = plansQuery.data?.data ?? [];
+  const plans = useMemo(() => plansQuery.data?.data ?? [], [plansQuery.data?.data]);
   const counts = useMemo(() => ({
     total: plans.length,
     approved: plans.filter((plan) => plan.status === "approved").length,
