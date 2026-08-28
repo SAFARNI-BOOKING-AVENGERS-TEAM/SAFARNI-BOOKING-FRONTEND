@@ -19,6 +19,8 @@ export interface TourListParams {
   status?: string;
 }
 
+type TourWritePayload = Record<string, unknown>;
+
 export const tourApi = {
   getTours: async (params: TourListParams = {}) => {
     const res = await apiClient.get<PaginatedResponse<Tour>>("/tours", { params });
@@ -30,12 +32,12 @@ export const tourApi = {
     return res.data;
   },
 
-  createTour: async (payload: any) => {
+  createTour: async (payload: TourWritePayload) => {
     const res = await apiClient.post<ApiResponse<Tour>>("/tours/createTour", payload);
     return res.data;
   },
 
-  updateTour: async (id: string, payload: any) => {
+  updateTour: async (id: string, payload: TourWritePayload) => {
     const res = await apiClient.patch<ApiResponse<Tour>>(`/tours/updateTour/${id}`, payload);
     return res.data;
   },
