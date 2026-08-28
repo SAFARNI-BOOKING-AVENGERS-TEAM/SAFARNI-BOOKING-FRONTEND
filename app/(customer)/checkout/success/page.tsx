@@ -35,7 +35,6 @@ function SuccessContent() {
     } catch {
       // Session storage can be unavailable in some browser contexts.
     } finally {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- marks completion of the one-time browser storage recovery
       setRecoveryChecked(true);
     }
   }, [querySessionId]);
