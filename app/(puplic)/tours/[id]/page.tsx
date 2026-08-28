@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Clock, Languages, Tag, CheckCircle2, XCircle } from "lucide-react";
 import { useTourDetails, useTourReviews, useAddTourReview } from "@/lib/hooks/use-tours";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -22,6 +22,7 @@ import { formatPrice } from "@/lib/utils";
 
 export default function TourDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const { data, isLoading, isError } = useTourDetails(id);
@@ -58,7 +59,7 @@ export default function TourDetailPage() {
 
   const handleBook = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/tours/${id}`;
+      router.push(`/login?redirect=/tours/${id}`);
       return;
     }
     setModalOpen(true);
@@ -66,7 +67,7 @@ export default function TourDetailPage() {
 
   const handleSubmitReview = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/tours/${id}`;
+      router.push(`/login?redirect=/tours/${id}`);
       return;
     }
     if (reviewRating === 0) {
@@ -168,7 +169,6 @@ export default function TourDetailPage() {
             </div>
           )}
 
-          {/* Reviews */}
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-3">Reviews</h2>
             {reviewsLoading ? (
