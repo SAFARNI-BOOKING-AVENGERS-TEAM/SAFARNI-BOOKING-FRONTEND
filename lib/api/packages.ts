@@ -9,6 +9,16 @@ import type {
   BookingCategory,
 } from "@/types";
 
+type PackageWritePayload = Record<string, unknown>;
+
+export interface PackageBookingItemInput {
+  category: BookingCategory;
+  itemId: string;
+  startDate: string;
+  endDate: string;
+  details?: Record<string, unknown>;
+}
+
 export const packageApi = {
   getPackages: async () => {
     const res = await apiClient.get<ApiResponse<Package[]>>("/packages");
@@ -20,7 +30,7 @@ export const packageApi = {
     return res.data;
   },
 
-  createPackage: async (payload: any) => {
+  createPackage: async (payload: PackageWritePayload) => {
     const res = await apiClient.post<ApiResponse<Package>>("/packages", payload);
     return res.data;
   },
@@ -37,16 +47,7 @@ export const packageApi = {
     return res.data;
   },
 
-  bookPackage: async (
-    id: string,
-    items: {
-      category: BookingCategory;
-      itemId: string;
-      startDate: string;
-      endDate: string;
-      details?: any;
-    }[]
-  ) => {
+  bookPackage: async (id: string, items: PackageBookingItemInput[]) => {
     const res = await apiClient.post<ApiResponse<PackageBookingResult>>(`/packages/${id}/book`, {
       items,
     });
