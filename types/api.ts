@@ -23,7 +23,7 @@ export interface ApiError {
   success: false;
   message: string;
   statusCode: number;
-  cause?: any;
+  cause?: unknown;
   stack?: string;
 }
 
@@ -35,7 +35,7 @@ export interface ListQueryParams {
   name?: string;
   title?: string;
   status?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ─── Auth ───
