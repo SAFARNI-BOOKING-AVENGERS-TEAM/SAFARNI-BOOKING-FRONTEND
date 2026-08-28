@@ -8,6 +8,7 @@ const adminLinks = [
   { href: "/admin-providers", label: "Providers", icon: "Briefcase" },
   { href: "/admin-services", label: "Services", icon: "Layers" },
   { href: "/admin-bookings", label: "Bookings", icon: "Calendar" },
+  { href: "/admin-commissions", label: "Commissions", icon: "DollarSign" },
   { href: "/admin-audit", label: "Audit Logs", icon: "FileText" },
 ];
 
