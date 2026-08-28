@@ -1,7 +1,7 @@
 "use client";
 
 import { apiClient } from "./client";
-import type { PaginatedResponse, ApiResponse, ESIMPlan, ESIMOrder } from "@/types";
+import type { PaginatedResponse, ApiResponse, ESIMPlan, ESIMOrder, DataUnit } from "@/types";
 
 export interface ESIMListParams {
   country?: string;
@@ -9,6 +9,17 @@ export interface ESIMListParams {
   page?: number;
   limit?: number;
   mine?: boolean;
+}
+
+export interface ESIMPlanWritePayload {
+  name: string;
+  country: string;
+  region?: string;
+  dataAmount: number;
+  dataUnit: DataUnit;
+  validityDays: number;
+  price: number;
+  currency: string;
 }
 
 export const esimApi = {
@@ -22,12 +33,12 @@ export const esimApi = {
     return res.data;
   },
 
-  createPlan: async (payload: any) => {
+  createPlan: async (payload: ESIMPlanWritePayload) => {
     const res = await apiClient.post<ApiResponse<ESIMPlan>>("/esim/plans", payload);
     return res.data;
   },
 
-  updatePlan: async (id: string, payload: any) => {
+  updatePlan: async (id: string, payload: ESIMPlanWritePayload) => {
     const res = await apiClient.patch<ApiResponse<ESIMPlan>>(`/esim/plans/${id}`, payload);
     return res.data;
   },
