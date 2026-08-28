@@ -26,11 +26,24 @@ export interface Paginated<T> {
   pagination: Pagination;
 }
 
-export interface AdminService extends Record<string, any> {
+export interface AdminService {
   _id: string;
   serviceType: "hotels" | "cars" | "flights" | "tours" | "packages" | "esim";
   status?: "pending" | "approved" | "rejected";
   createdAt?: string;
+  name?: string;
+  title?: string;
+  hotelName?: string;
+  model?: string;
+  flightNumber?: string;
+  planName?: string;
+  city?: string;
+  location?: string;
+  airline?: string;
+  brand?: string;
+  destination?: string;
+  country?: string;
+  providerName?: string;
 }
 
 export interface AdminBooking {
