@@ -1,3 +1,5 @@
+import type { ProfilePicture, ProviderType, UserRole } from "./user";
+
 export interface ApiResponse<T = unknown> {
   message: string;
   statusCode: number;
@@ -55,8 +57,10 @@ export interface AuthResponse {
     id: string;
     name: string;
     email: string;
-    role: string;
+    role: UserRole;
+    providerType?: ProviderType;
     isVerified: boolean;
+    profilePicture?: ProfilePicture;
   };
 }
 
