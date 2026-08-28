@@ -16,12 +16,13 @@ const categoryMeta: Record<FavoriteCategory, { icon: typeof Building2; href: (id
 };
 
 function favoriteLabel(fav: FavoriteListItem): string {
-  if (!fav.item) return "This item is no longer available";
-  const item = fav.item as any;
-  if (fav.category === "hotels") return item.name;
-  if (fav.category === "cars") return `${item.brand} ${item.model}`;
-  if (fav.category === "flights") return `${item.airline} ${item.flightNumber}`;
-  return item.title;
+  const item = fav.item;
+  if (!item) return "This item is no longer available";
+  if ("name" in item) return item.name;
+  if ("brand" in item) return `${item.brand} ${item.model}`;
+  if ("airline" in item) return `${item.airline} ${item.flightNumber}`;
+  if ("title" in item) return item.title;
+  return "Saved item";
 }
 
 export default function FavoritesPage() {
