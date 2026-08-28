@@ -1,7 +1,14 @@
 "use client";
 
 import { apiClient } from "./client";
-import type { HotelListApiResponse, HotelDetailApiResponse, ApiResponse } from "@/types";
+import type {
+  HotelListApiResponse,
+  HotelDetailApiResponse,
+  ApiResponse,
+  Hotel,
+  Room,
+  HotelGalleryItem,
+} from "@/types";
 
 export interface HotelListParams {
   city?: string;
@@ -10,6 +17,9 @@ export interface HotelListParams {
   page?: number;
   limit?: number;
 }
+
+type HotelWritePayload = Record<string, unknown>;
+type RoomWritePayload = Record<string, unknown>;
 
 export const hotelApi = {
   getHotels: async (params: HotelListParams = {}) => {
@@ -24,45 +34,45 @@ export const hotelApi = {
 
   // ─── Provider/Admin management — wired up in Stage 5/6, kept here now
   // since the routes were already in front of us ───
-  createHotel: async (payload: any) => {
-    const res = await apiClient.post<ApiResponse<any>>("/hotels/admin/hotels", payload);
+  createHotel: async (payload: HotelWritePayload) => {
+    const res = await apiClient.post<ApiResponse<Hotel>>("/hotels/admin/hotels", payload);
     return res.data;
   },
 
-  updateHotel: async (hotelId: string, payload: any) => {
-    const res = await apiClient.patch<ApiResponse<any>>(`/hotels/admin/hotels/${hotelId}`, payload);
+  updateHotel: async (hotelId: string, payload: HotelWritePayload) => {
+    const res = await apiClient.patch<ApiResponse<Hotel>>(`/hotels/admin/hotels/${hotelId}`, payload);
     return res.data;
   },
 
   deleteHotel: async (hotelId: string) => {
-    const res = await apiClient.delete<ApiResponse<any>>(`/hotels/admin/hotels/${hotelId}`);
+    const res = await apiClient.delete<ApiResponse<Hotel>>(`/hotels/admin/hotels/${hotelId}`);
     return res.data;
   },
 
-  createRoom: async (hotelId: string, payload: any) => {
-    const res = await apiClient.post<ApiResponse<any>>(`/hotels/admin/${hotelId}/rooms`, payload);
+  createRoom: async (hotelId: string, payload: RoomWritePayload) => {
+    const res = await apiClient.post<ApiResponse<Room>>(`/hotels/admin/${hotelId}/rooms`, payload);
     return res.data;
   },
 
-  updateRoom: async (roomId: string, payload: any) => {
-    const res = await apiClient.patch<ApiResponse<any>>(`/hotels/admin/rooms/${roomId}`, payload);
+  updateRoom: async (roomId: string, payload: RoomWritePayload) => {
+    const res = await apiClient.patch<ApiResponse<Room>>(`/hotels/admin/rooms/${roomId}`, payload);
     return res.data;
   },
 
   deleteRoom: async (roomId: string) => {
-    const res = await apiClient.delete<ApiResponse<any>>(`/hotels/admin/rooms/${roomId}`);
+    const res = await apiClient.delete<ApiResponse<Room>>(`/hotels/admin/rooms/${roomId}`);
     return res.data;
   },
 
   uploadHotelImages: async (hotelId: string, formData: FormData) => {
-    const res = await apiClient.post<ApiResponse<any>>(`/hotels/admin/${hotelId}/images`, formData, {
+    const res = await apiClient.post<ApiResponse<HotelGalleryItem[]>>(`/hotels/admin/${hotelId}/images`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },
 
   updateHotelStatus: async (hotelId: string, status: "approved" | "rejected") => {
-    const res = await apiClient.patch<ApiResponse<any>>(`/hotels/admin/hotels/${hotelId}/status`, {
+    const res = await apiClient.patch<ApiResponse<Hotel>>(`/hotels/admin/hotels/${hotelId}/status`, {
       status,
     });
     return res.data;
