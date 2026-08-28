@@ -21,9 +21,16 @@ interface PackageBookingModalProps {
 interface ItemDates { startDate: string; endDate: string; }
 
 function itemLabel(item: PackageResolvedItem) {
-  if (item.category === "hotels") return `${item.hotel?.name ?? "Hotel"} — ${item.room?.name ?? ""}`;
-  const doc = item.item as any;
-  return doc?.title || doc?.brand || doc?.flightNumber || "Item";
+  if (item.category === "hotels") {
+    return `${item.hotel?.name ?? "Hotel"} — ${item.room?.name ?? ""}`;
+  }
+
+  const doc = item.item;
+  if (!doc) return "Item";
+  if ("title" in doc) return doc.title;
+  if ("brand" in doc) return doc.brand;
+  if ("flightNumber" in doc) return doc.flightNumber;
+  return "Item";
 }
 
 export default function PackageBookingModal({
