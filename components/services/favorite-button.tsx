@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useFavorites, useToggleFavorite } from "@/lib/hooks/use-favorites";
@@ -17,6 +18,7 @@ interface FavoriteButtonProps {
 }
 
 export default function FavoriteButton({ category, itemId, className, size = 18 }: FavoriteButtonProps) {
+  const router = useRouter();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   const { data } = useFavorites();
   const { addMutation, removeMutation } = useToggleFavorite();
@@ -31,7 +33,7 @@ export default function FavoriteButton({ category, itemId, className, size = 18 
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
