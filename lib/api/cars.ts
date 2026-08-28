@@ -9,6 +9,8 @@ export interface CarListParams {
   available?: boolean;
 }
 
+type CarWritePayload = Record<string, unknown>;
+
 export const carApi = {
   // NOTE: backend applies no status filtering here — see useCars() for the
   // client-side safety net used on public pages.
@@ -22,12 +24,12 @@ export const carApi = {
     return res.data;
   },
 
-  createCar: async (payload: any) => {
+  createCar: async (payload: CarWritePayload) => {
     const res = await apiClient.post<ApiResponse<Car>>("/cars/createCar", payload);
     return res.data;
   },
 
-  updateCar: async (id: string, payload: any) => {
+  updateCar: async (id: string, payload: CarWritePayload) => {
     const res = await apiClient.patch<ApiResponse<Car>>(`/cars/updateCar/${id}`, payload);
     return res.data;
   },
