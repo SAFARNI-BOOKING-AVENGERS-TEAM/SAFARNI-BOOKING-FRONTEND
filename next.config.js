@@ -1,11 +1,17 @@
 /** @type {import('next').NextConfig} */
+const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/+$/, "") || "";
+
 const nextConfig = {
-  // Proxy API requests to your Express backend during development
+  // Proxy API requests to your Express backend when a backend URL is configured.
+  // Returning no rewrites keeps production builds from failing when an env file
+  // has not been created yet; runtime API calls still require configuration.
   async rewrites() {
+    if (!apiUrl) return [];
+
     return [
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+        destination: `${apiUrl}/:path*`,
       },
     ];
   },
@@ -35,9 +41,9 @@ const nextConfig = {
     ],
   },
 
-  // Environment variables available at build time
+  // Environment variable available to browser-side API clients at build time.
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_API_URL: apiUrl,
   },
 };
 
