@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   validate:
-    name: Type Check, Build, Audit, and Docker
+    name: Lint, Type Check, Build, Audit, and Docker
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -39,6 +39,9 @@ jobs:
 
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
+
+      - name: ESLint quality gate
+        run: npm run lint -- --max-warnings=0
 
       - name: TypeScript check
         run: npm run type-check
