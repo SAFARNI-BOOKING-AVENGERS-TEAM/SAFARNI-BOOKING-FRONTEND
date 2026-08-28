@@ -11,7 +11,7 @@ export interface Booking {
   endDate: string;
   totalPrice: number;
   status: BookingStatus;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,7 +21,7 @@ export interface BookingInput {
   itemId: string;
   startDate: string;
   endDate: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface PackageBookingInput {
@@ -30,6 +30,6 @@ export interface PackageBookingInput {
     itemId: string;
     startDate: string;
     endDate: string;
-    details?: Record<string, any>;
+    details?: Record<string, unknown>;
   }[];
 }
