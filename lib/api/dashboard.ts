@@ -10,6 +10,16 @@ export interface StatusCount {
   rejected: number;
 }
 
+export interface CommissionSummary {
+  commissionRatePercent: number;
+  completedBookings: number;
+  grossCompleted: number;
+  pendingGross: number;
+  reversalPendingGross: number;
+  reversedGross: number;
+  reversedCommission: number;
+}
+
 export interface AdminDashboardStats {
   users: {
     total: number;
@@ -30,6 +40,10 @@ export interface AdminDashboardStats {
   };
   esim: { completedOrders: number; revenue: number };
   payments: { totalConfirmedRevenue: number };
+  commission: CommissionSummary & {
+    commissionEarned: number;
+    providerNetPayable: number;
+  };
 }
 
 export interface ProviderDashboardStats {
@@ -56,6 +70,12 @@ export interface ProviderDashboardStats {
     travel: number;
     esim: number;
     total: number;
+  };
+  earnings: CommissionSummary & {
+    platformCommission: number;
+    providerNet: number;
+    esimGross: number;
+    totalProviderEarnings: number;
   };
 }
 
