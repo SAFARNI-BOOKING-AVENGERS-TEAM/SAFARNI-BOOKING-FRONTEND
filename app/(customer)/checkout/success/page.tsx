@@ -24,17 +24,18 @@ function SuccessContent() {
   const toast = useToast();
 
   useEffect(() => {
-    if (querySessionId) {
-      setRecoveryChecked(true);
-      return;
-    }
+    if (querySessionId) return;
 
     try {
       const saved = sessionStorage.getItem(LAST_CHECKOUT_SESSION_KEY) || "";
-      if (saved.startsWith("cs_")) setFallbackSessionId(saved);
+      if (saved.startsWith("cs_")) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- recovering browser session state after hydration is intentional
+        setFallbackSessionId(saved);
+      }
     } catch {
       // Session storage can be unavailable in some browser contexts.
     } finally {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- marks completion of the one-time browser storage recovery
       setRecoveryChecked(true);
     }
   }, [querySessionId]);
@@ -109,7 +110,7 @@ function SuccessContent() {
       <Card className="max-w-xl mx-auto">
         <CardContent className="p-6">
           <AlertTriangle className="w-10 h-10 text-amber-500" />
-          <h1 className="text-xl font-bold text-gray-900 mt-4">We couldn't verify this payment yet</h1>
+          <h1 className="text-xl font-bold text-gray-900 mt-4">We couldn&apos;t verify this payment yet</h1>
           <p className="text-sm text-gray-500 mt-2">
             The payment may already be complete. SAFARNI will not ask you to pay again until verification succeeds.
           </p>
