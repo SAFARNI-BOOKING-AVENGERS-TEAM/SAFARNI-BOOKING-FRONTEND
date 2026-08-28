@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Building2, Car, Plane, MapPin } from "lucide-react";
 import { usePackageDetails } from "@/lib/hooks/use-packages";
@@ -19,6 +19,7 @@ const categoryIcon: Record<string, typeof Building2> = {
 
 export default function PackageDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
 
   const { data, isLoading, isError } = usePackageDetails(id);
@@ -48,7 +49,7 @@ export default function PackageDetailPage() {
 
   const handleBook = () => {
     if (!isAuthenticated) {
-      window.location.href = `/login?redirect=/packages/${id}`;
+      router.push(`/login?redirect=/packages/${id}`);
       return;
     }
     setModalOpen(true);
