@@ -2,7 +2,7 @@
 
 > Your Ultimate Travel Booking Platform
 
-A modern travel booking platform where users can search and book flights, hotels, tours, and car rentals — all in one place. Built as a React SPA with Vite, Redux Toolkit, and styled with Tailwind CSS, connected to an Express/MongoDB backend.
+A modern travel booking platform where users can search and book flights, hotels, tours, car rentals and Esim - Packages feature — all in one place. Built as a React SPA with Vite, Redux Toolkit, and styled with Tailwind CSS, connected to an Express/MongoDB backend.
 
 ![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=for-the-badge&logo=vite)
